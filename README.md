@@ -9,3 +9,8 @@ After enabling GitHub Pages, open the published Pages URL. The app is a static `
 ## Data and privacy
 
 Task completion changes are saved in the browser's local storage. Export a JSON backup periodically. This repository is currently public, so anyone can view the dashboard source and the study schedule included in it. Consider switching the repository to Private if you do not want the schedule publicly visible.
+
+## Study dashboards
+
+- [Sanad – Grade 8 Study Dashboard](https://hazemalamayreh.github.io/sanad-/)
+- [Saif – Grade 6 Study Dashboard](https://hazemalamayreh.github.io/sanad-/saif.html)
