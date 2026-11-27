@@ -136,6 +136,32 @@ body.pdf-exporting .weekly-report-footer{font-size:6.5pt!important;color:#6d7890
 .task-exam-collapse summary{cursor:pointer;color:var(--blue);font-size:13px;font-weight:700;list-style-position:inside}
 .task-exam-text{white-space:pre-wrap;line-height:1.65;margin-top:10px;padding-top:9px;border-top:1px solid var(--line);max-height:420px;overflow:auto;font-size:13px;color:#37445e}
 
+
+#vocabQuizModal{display:none;position:fixed;inset:0;z-index:100000;background:rgba(12,20,42,.76);padding:16px;overflow:auto;align-items:center;justify-content:center}
+#vocabQuizModal.open{display:flex}
+.vocab-quiz-shell{width:min(760px,100%);max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:18px;box-shadow:0 20px 70px #0005;padding:22px;color:#17223b}
+.vocab-quiz-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid #e2e8f2;padding-bottom:13px;margin-bottom:15px}
+.vocab-quiz-head h2{margin:0 0 4px;font-size:21px}.vocab-quiz-head p{margin:0;color:#66738b;font-size:13px}
+.vocab-quiz-close{border:1px solid #dce3ef;background:#f5f7fb;color:#24314d;border-radius:10px;padding:8px 12px;cursor:pointer}
+.vocab-quiz-counter{font-size:12px;color:#64718a;font-weight:700}
+.vocab-quiz-progress{height:8px;background:#edf0f6;border-radius:99px;overflow:hidden;margin:9px 0 18px}.vocab-quiz-progress span{display:block;height:100%;background:linear-gradient(90deg,#3f63d8,#8b6bd6)}
+.vocab-quiz-question{font-size:18px;line-height:1.55;font-weight:700;margin:0 0 15px}
+.vocab-quiz-options{display:grid;gap:9px}
+.vocab-quiz-option{width:100%;text-align:left;border:1px solid #dce3ef;background:#fff;border-radius:11px;padding:12px 14px;font:inherit;cursor:pointer;color:#24314d}
+.vocab-quiz-option:hover:not(:disabled){border-color:#7188d7;background:#f6f8ff}
+.vocab-quiz-option:disabled{cursor:default;opacity:1}
+.vocab-quiz-option.correct{border-color:#239466;background:#edf9f2;color:#126744;font-weight:700}
+.vocab-quiz-option.incorrect{border-color:#d66d6d;background:#fff2f2;color:#983d3d}
+.vocab-quiz-feedback{margin-top:13px;border-radius:10px;padding:11px 13px;background:#f2f5fb;color:#40506b;font-size:13px;line-height:1.5}
+.vocab-quiz-feedback.good{background:#edf9f2;color:#126744}.vocab-quiz-feedback.bad{background:#fff5eb;color:#8a5413}
+.vocab-quiz-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.vocab-quiz-controls button{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.vocab-quiz-primary{background:#3f63d8;color:#fff}.vocab-quiz-secondary{background:#edf1f8;color:#33415e}
+.vocab-quiz-result{text-align:center;padding:15px 4px 20px}.vocab-quiz-result strong{display:block;font-size:34px;color:#3f63d8;margin:8px 0}
+.vocab-quiz-review{display:grid;gap:9px;text-align:left;margin-top:17px}
+.vocab-quiz-review-item{border:1px solid #e0e6f0;border-radius:10px;padding:11px;font-size:13px;line-height:1.5}
+@media(max-width:600px){#vocabQuizModal{padding:7px}.vocab-quiz-shell{max-height:calc(100vh - 14px);padding:15px}.vocab-quiz-head h2{font-size:18px}.vocab-quiz-question{font-size:16px}}
+
 </style>
 </head>
 <body>
@@ -215,6 +241,14 @@ body.pdf-exporting .weekly-report-footer{font-size:6.5pt!important;color:#6d7890
 </div>
 <footer>Progress is saved in this browser on this device. Export a backup before changing devices.</footer>
 </main>
+
+<div id="vocabQuizModal" role="dialog" aria-modal="true" aria-labelledby="vocabQuizTitle">
+ <section class="vocab-quiz-shell">
+  <div class="vocab-quiz-head"><div><h2 id="vocabQuizTitle">Vocabulary Quiz</h2><p id="vocabQuizSubtitle"></p></div><button class="vocab-quiz-close" type="button" onclick="closeVocabQuiz()">Close ✕</button></div>
+  <div id="vocabQuizContent"></div>
+ </section>
+</div>
+
 <div id="arabicExamModal" role="dialog" aria-modal="true" aria-labelledby="arabicExamTitle">
  <section class="exam-shell">
   <div class="exam-top">
@@ -273,7 +307,7 @@ function render(){
  <div class="tasktop"><input type="checkbox" ${t.done?'checked':''} onchange="toggle(${t.id})"><div class="tasktitle">${esc(t.title)}</div></div>
  <div class="details">${renderTaskDetails(t)}</div>
  <div class="meta"><span class="tag">${esc(t.subject)}</span><span class="tag">${t.minutes} min</span><span class="tag ${t.status==='estimated'?'est':'confirm'}">${t.status==='estimated'?'Estimated':'Confirmed'}</span><span class="tag ${t.phase==='revision'?'revision':''}">${t.phase==='revision'?'Revision':'First-pass study'}</span><span class="tag">${t.done?'Completed':'To do'}</span></div>
- <div class="actions">${t.title.includes('ناقة صالح')?'<button class="btn primary" onclick="startArabicExam()">Start Exam</button>':''}<button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div>
+ <div class="actions">${t.title.includes('ناقة صالح')?'<button class="btn primary" onclick="startArabicExam()">Start Exam</button>':''}${t.title.includes('Vocabulary – Is that a fact?')?'<button class="btn primary" onclick="startVocabQuiz(\'fact\')">Start Quiz</button>':''}${t.title.includes('Vocabulary – Pompeii + worksheet')?'<button class="btn primary" onclick="startVocabQuiz(\'pompeii\')">Start Quiz</button>':''}<button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div>
  </div>`).join('')||'<p class="muted">No study tasks. Check the school delivery/exam note above.</p>';
 }
 
@@ -424,6 +458,69 @@ function finishArabicExam(){
 }
 document.getElementById('arabicExamModal')?.addEventListener('click',e=>{if(e.target.id==='arabicExamModal')closeArabicExam()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArabicExam()});
+
+const vocabQuizData={"fact":{"title":"Is That a Fact? – Vocabulary Quiz","subtitle":"November 27 • Vocabulary Worksheet (1)","questions":[{"q":"The new security system is so ______ that it can recognize faces and voices automatically.","options":["Bias","Sophisticated","Purpose","Gist"],"correct":1,"why":"Sophisticated means intelligent or made in a complicated way."},{"q":"While the hotel offers many ______, the guests were most impressed by the rooftop pool.","options":["Amenities","Rumblings","Parquet","Eruptions"],"correct":0,"why":"Amenities are things such as a swimming pool or shopping centre that make life more pleasant or comfortable."},{"q":"Since the article was written with clear ______, it failed to present both sides fairly.","options":["Gist","Purpose","Bias","Deduce"],"correct":2,"why":"Bias means unfairly supporting or opposing someone or something because personal opinions influence your judgement."},{"q":"From the clues in the letter, we can ______ that the writer was living in fear.","options":["Excavate","Deduce","Rumble","Erupt"],"correct":1,"why":"Deduce means to reach an answer or decision by thinking carefully about known facts."},{"q":"Even though the story was long, I quickly understood the ______ after reading the introduction.","options":["Gist","Amenities","Bias","Purpose"],"correct":0,"why":"Gist means the most important pieces of information about something."},{"q":"The ______ of the meeting was to discuss ways to protect the environment.","options":["Sophistication","Gist","Purpose","Bias"],"correct":2,"why":"Purpose means the reason why you do something or why something exists."}]},"pompeii":{"title":"Pompeii – Vocabulary Quiz","subtitle":"November 28 • Vocabulary Worksheet (1)","questions":[{"q":"A person who studies the buildings, graves, tools and objects of people who lived in the past is an ______.","options":["Archaeologist","Architect","Artist","Author"],"correct":0,"why":"An archaeologist studies buildings, graves, tools and other objects from people who lived in the past."},{"q":"The ballroom had a beautiful ______ floor made of small rectangular blocks of wood arranged in a pattern.","options":["Parquet","Purpose","Gist","Bias"],"correct":0,"why":"Parquet is floor covering made of small rectangular blocks of wood arranged in a pattern."},{"q":"Before the sudden ______, the villagers noticed smoke and ash rising from the mountain.","options":["Excavation","Eruption","Rumblings","Amenities"],"correct":1,"why":"An eruption is when a volcano explodes and lava, flames and rocks come out of it."},{"q":"The team began to ______ the ancient site carefully so they would not damage hidden artifacts.","options":["Deduce","Erupt","Excavate","Rumble"],"correct":2,"why":"Excavate means to remove the earth covering very old objects buried in the ground to discover things about the past."},{"q":"The ground started shaking and strange ______ echoed from the mountain before the lava appeared.","options":["Parquets","Amenities","Rumblings","Purposes"],"correct":2,"why":"Rumblings are continuous low sounds."}]}};
+let activeVocabQuizId=null,vocabQuizIndex=0,vocabQuizScore=0,vocabQuizAnswered=false,vocabQuizSelected=-1,vocabQuizResults=[];
+function startVocabQuiz(id){
+ activeVocabQuizId=id;
+ const quiz=vocabQuizData[id];if(!quiz)return;
+ vocabQuizIndex=0;vocabQuizScore=0;vocabQuizAnswered=false;vocabQuizSelected=-1;vocabQuizResults=[];
+ document.getElementById('vocabQuizTitle').textContent=quiz.title;
+ document.getElementById('vocabQuizSubtitle').textContent=quiz.subtitle;
+ document.getElementById('vocabQuizModal').classList.add('open');
+ document.body.style.overflow='hidden';
+ renderVocabQuizQuestion();
+}
+function closeVocabQuiz(){document.getElementById('vocabQuizModal').classList.remove('open');document.body.style.overflow='';}
+function selectVocabAnswer(index){
+ if(vocabQuizAnswered)return;
+ vocabQuizSelected=index;vocabQuizAnswered=true;
+ const q=vocabQuizData[activeVocabQuizId].questions[vocabQuizIndex];
+ const correct=index===q.correct;if(correct)vocabQuizScore++;
+ vocabQuizResults.push({selected:index,correct:correct});
+ renderVocabQuizQuestion();
+}
+function renderVocabQuizQuestion(){
+ const quiz=vocabQuizData[activeVocabQuizId],q=quiz.questions[vocabQuizIndex],total=quiz.questions.length;
+ const pct=Math.round((vocabQuizIndex+1)/total*100);
+ const options=q.options.map((op,i)=>{
+  let state='';
+  if(vocabQuizAnswered&&i===q.correct)state=' correct';
+  else if(vocabQuizAnswered&&i===vocabQuizSelected)state=' incorrect';
+  return '<button type="button" class="vocab-quiz-option'+state+'" '+(vocabQuizAnswered?'disabled':'')+' onclick="selectVocabAnswer('+i+')">'+String.fromCharCode(65+i)+'. '+esc(op)+'</button>';
+ }).join('');
+ let feedback='';
+ if(vocabQuizAnswered){
+  const right=vocabQuizSelected===q.correct;
+  feedback='<div class="vocab-quiz-feedback '+(right?'good':'bad')+'"><b>'+(right?'Correct!':'Not quite.')+'</b> '+esc(q.why)+'</div>';
+ }
+ const next=vocabQuizIndex===total-1?'See results':'Next question →';
+ document.getElementById('vocabQuizContent').innerHTML=
+  '<div class="vocab-quiz-counter">QUESTION '+(vocabQuizIndex+1)+' OF '+total+' • SCORE '+vocabQuizScore+'</div>'+
+  '<div class="vocab-quiz-progress"><span style="width:'+pct+'%"></span></div>'+
+  '<div class="vocab-quiz-question">'+esc(q.q)+'</div>'+
+  '<div class="vocab-quiz-options">'+options+'</div>'+feedback+
+  '<div class="vocab-quiz-controls"><span class="muted">'+(vocabQuizAnswered?'Answer recorded':'Choose one answer')+'</span>'+
+  (vocabQuizAnswered?'<button class="vocab-quiz-primary" onclick="nextVocabQuizQuestion()">'+next+'</button>':'')+'</div>';
+}
+function nextVocabQuizQuestion(){
+ if(!vocabQuizAnswered)return;
+ const total=vocabQuizData[activeVocabQuizId].questions.length;
+ if(vocabQuizIndex<total-1){vocabQuizIndex++;vocabQuizAnswered=false;vocabQuizSelected=-1;renderVocabQuizQuestion();}
+ else renderVocabQuizResult();
+}
+function renderVocabQuizResult(){
+ const quiz=vocabQuizData[activeVocabQuizId],total=quiz.questions.length,pct=Math.round(vocabQuizScore/total*100);
+ const review=quiz.questions.map((q,i)=>{
+  return '<div class="vocab-quiz-review-item"><b>'+(i+1)+'. '+esc(q.q)+'</b><br>Your answer: '+esc(q.options[vocabQuizResults[i].selected])+'<br>Correct answer: <b>'+esc(q.options[q.correct])+'</b></div>';
+ }).join('');
+ document.getElementById('vocabQuizContent').innerHTML=
+  '<div class="vocab-quiz-result"><h3>Quiz completed!</h3><strong>'+vocabQuizScore+' / '+total+'</strong><div>'+pct+'% correct</div><p class="muted">Review the correct answers below, then try again to improve your score.</p></div>'+
+  '<div class="vocab-quiz-review">'+review+'</div>'+
+  '<div class="vocab-quiz-controls"><button class="vocab-quiz-secondary" onclick="closeVocabQuiz()">Close</button><button class="vocab-quiz-primary" onclick="startVocabQuiz(activeVocabQuizId)">Try again</button></div>';
+}
+document.getElementById('vocabQuizModal')?.addEventListener('click',e=>{if(e.target.id==='vocabQuizModal')closeVocabQuiz();});
+
 renderWeekOptions();
 
 render();
