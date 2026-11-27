@@ -109,6 +109,28 @@ body.pdf-exporting .weekly-minutes{font-size:6.2pt!important;color:#66718a!impor
 body.pdf-exporting .weekly-task-detail{font-size:6.1pt!important;line-height:1.12!important;color:#657089!important;margin-left:4.7mm!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
 body.pdf-exporting .weekly-report-footer{font-size:6.5pt!important;color:#6d7890!important;border-top:1px solid #e6ebf3!important;padding-top:1.5mm!important;margin-top:1mm!important}
 
+#arabicExamModal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(12,20,42,.72);padding:18px;overflow:auto;align-items:center;justify-content:center}
+#arabicExamModal.open{display:flex}
+.exam-shell{width:min(900px,100%);max-height:calc(100vh - 36px);overflow:auto;background:#fff;border-radius:18px;box-shadow:0 20px 70px #0005;padding:22px;color:#17223b}
+.exam-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid #e2e8f2;padding-bottom:14px;margin-bottom:15px}
+.exam-top h2{margin:0 0 4px;font-size:22px}.exam-top p{margin:0;color:#66738b;font-size:13px}
+.exam-close{border:1px solid #dce3ef;background:#f5f7fb;color:#24314d;border-radius:10px;padding:8px 12px;cursor:pointer}
+.exam-progress{height:8px;background:#edf0f6;border-radius:99px;overflow:hidden;margin:10px 0 17px}.exam-progress span{display:block;height:100%;background:linear-gradient(90deg,#3f63d8,#8b6bd6)}
+.exam-counter{font-size:12px;color:#64718a;font-weight:700}
+.exam-question{font-size:19px;line-height:1.65;white-space:pre-line;margin:13px 0 19px;font-weight:650}
+.exam-answer-label{font-size:13px;font-weight:700;color:#42506c;margin-bottom:6px;display:block}
+.exam-answer-box{width:100%;min-height:130px;border:1px solid #cfd8e8;border-radius:12px;padding:12px;font:inherit;resize:vertical;direction:auto}
+.exam-controls{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px}
+.exam-controls button{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:650;cursor:pointer}
+.exam-primary{background:#3f63d8;color:#fff}.exam-secondary{background:#edf1f8;color:#33415e}
+.exam-review{display:grid;gap:12px}
+.exam-review-item{border:1px solid #e0e6f0;border-radius:12px;padding:13px}
+.exam-review-item h3{margin:0 0 8px;font-size:15px;white-space:pre-line}
+.exam-student-answer{background:#f6f8fc;padding:9px;border-radius:8px;white-space:pre-wrap;font-size:13px;margin:8px 0}
+.exam-review-item details{margin-top:8px}.exam-review-item summary{cursor:pointer;color:#3156b7;font-weight:700;font-size:13px}
+.exam-model-answer{white-space:pre-wrap;background:#eef7f1;border:1px solid #d6eadc;border-radius:8px;padding:10px;margin-top:8px;font-size:13px}
+.exam-finish-title{font-size:20px;margin:0 0 6px}.exam-finish-sub{color:#64718a;font-size:13px;margin:0 0 16px}
+@media(max-width:600px){#arabicExamModal{padding:8px}.exam-shell{max-height:calc(100vh - 16px);padding:15px}.exam-top h2{font-size:18px}.exam-question{font-size:17px}}
 </style>
 </head>
 <body>
@@ -188,6 +210,15 @@ body.pdf-exporting .weekly-report-footer{font-size:6.5pt!important;color:#6d7890
 </div>
 <footer>Progress is saved in this browser on this device. Export a backup before changing devices.</footer>
 </main>
+<div id="arabicExamModal" role="dialog" aria-modal="true" aria-labelledby="arabicExamTitle">
+ <section class="exam-shell">
+  <div class="exam-top">
+   <div><h2 id="arabicExamTitle">امتحان اللغة العربية – الدرس الأول</h2><p>ناقة صالح عليه السلام • 27 سؤالاً</p></div>
+   <button class="exam-close" type="button" onclick="closeArabicExam()">Close ✕</button>
+  </div>
+  <div id="arabicExamContent"></div>
+ </section>
+</div>
 <div id="weeklyPrintArea" aria-hidden="true"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
@@ -237,7 +268,7 @@ function render(){
  <div class="tasktop"><input type="checkbox" ${t.done?'checked':''} onchange="toggle(${t.id})"><div class="tasktitle">${esc(t.title)}</div></div>
  <div class="details">${esc(t.detail)}</div>
  <div class="meta"><span class="tag">${esc(t.subject)}</span><span class="tag">${t.minutes} min</span><span class="tag ${t.status==='estimated'?'est':'confirm'}">${t.status==='estimated'?'Estimated':'Confirmed'}</span><span class="tag ${t.phase==='revision'?'revision':''}">${t.phase==='revision'?'Revision':'First-pass study'}</span><span class="tag">${t.done?'Completed':'To do'}</span></div>
- <div class="actions"><button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div>
+ <div class="actions">${t.title.includes('ناقة صالح')?'<button class="btn primary" onclick="startArabicExam()">Start Exam</button>':''}<button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div>
  </div>`).join('')||'<p class="muted">No study tasks. Check the school delivery/exam note above.</p>';
 }
 function selectDay(d){selected=d;render()}
@@ -360,6 +391,23 @@ function printSelectedWeeks(){
  window.addEventListener('afterprint',restore);
  setTimeout(()=>window.print(),120);
 }
+const arabicExamQuestions=[{"q":"ما معنى شاهق؟","a":"عالٍ."},{"q":"ما معنى الجامد؟","a":"اليابس."},{"q":"ما معنى تدفقت؟","a":"سالت."},{"q":"ما معنى معدودة؟","a":"قليلة."},{"q":"ما معنى دررت؟","a":"صببت بغزارة."},{"q":"ما ضد الغباء؟","a":"الذكاء."},{"q":"ما ضد انتهاؤها؟","a":"ابتداؤها."},{"q":"ما ضد الكره؟","a":"الود."},{"q":"ما ضد ظهور؟","a":"اختفاء."},{"q":"عرفت الناقة باسمين اثنين، أذكرهما.","a":"ناقة صالح، وناقة الله."},{"q":"استنتج من الفقرة الخامسة الفكرة الرئيسة.","a":"خروج الناقة من الصخرة."},{"q":"أرفق الفكرة الرئيسة للفقرة الخامسة بفكرتين داعمتين.","a":"- تحلق القوم حول الناقة.\n- تحذير صالح قومه من إيذائها."},{"q":"أعطي دليلاً من النص على ثراء قوم ثمود.","a":"كان لأغنيائهم قصور في سهول المدينة، وكانت لهم بيوت منحوتة في الجبال."},{"q":"أعطي دليلاً على علو شأن صالح عليه السلام قبل أن يأمر قومه بعبادة الله.","a":"كان علمه محل احترام، وعقله موضع إقناع، وكلامه موضع تصديق."},{"q":"أعطي دليلاً على ظهور شعور الحقد والكره تجاه الناقة.","a":"اتسعت رقعة الكره في صدورهم."},{"q":"اتصف قوم ثمود بأنهم ............","a":"أقوياء البنية."},{"q":"ما النهاية التي حلت بالناقة؟","a":"عقر الناقة وقتلها."},{"q":"بماذا أهلك الله قوم ثمود؟","a":"بالصيحة."},{"q":"ما رد الفعل على خروج الناقة من الصخر؟","a":"الدهشة."},{"q":"ما رد الفعل على تقسيم الماء بين الناقة والقوم؟","a":"الاستياء والتذمر."},{"q":"ما رد الفعل على نزول العقاب بثمود؟","a":"الندم."},{"q":"ما أبرز القيم في النص؟","a":"- الإيمان بالله وطاعته.\n- طاعة الرسل.\n- الرفق بالحيوان.\n- الوفاء بالعهد.\n- الابتعاد عن الحقد والكره."},{"q":"اقترح عنواناً آخر مناسباً للنص، وعلل اختيارك.","a":"معجزة ناقة صالح؛ لأن النص يتحدث عن خروج الناقة من الصخرة بأمر الله."},{"q":"اختر التعبير الأجمل من وجهة نظرك، وعلل اختيارك.\nالتعبير الأول: تدفقت الدماء في عروقي كتدفق الماء في النهر.\nالتعبير الثاني: قلوبهم كالحجارة أو أشد قسوة.","a":"أختار التعبير الثاني؛ لأنه يدل على شدة قسوة قلوب قوم ثمود وعدم رحمتهم."},{"q":"ماذا تعلمت من قصة ناقة صالح عليه السلام؟","a":"تعلمت أن الله قادر على كل شيء، وأن علينا طاعة الله ورسله والرفق بالحيوان."},{"q":"فرّق في معنى كلمة «آية» في الجملتين:\n1. نريد آية من الله على نبوتك.\n2. أقرأ آية الكرسي بعد كل صلاة.","a":"1. معجزة.\n2. جزء من القرآن الكريم."},{"q":"فرّق في المعنى بين «ربتت» و«ربّت» في الجملتين:\n1. زال الخوف حين ربتت الصبية على عنقي.\n2. ربّت الأم أبناءها تربية صالحة.","a":"1. لمست برفق وحنان.\n2. نشّأت وعلّمت."}];
+let arabicExamIndex=0,arabicExamAnswers=Array(arabicExamQuestions.length).fill('');
+function startArabicExam(){arabicExamIndex=0;arabicExamAnswers=Array(arabicExamQuestions.length).fill('');document.getElementById('arabicExamModal').classList.add('open');document.body.style.overflow='hidden';renderArabicExamQuestion()}
+function closeArabicExam(){document.getElementById('arabicExamModal').classList.remove('open');document.body.style.overflow=''}
+function saveArabicExamAnswer(){const box=document.getElementById('arabicExamAnswer');if(box)arabicExamAnswers[arabicExamIndex]=box.value}
+function renderArabicExamQuestion(){
+ const q=arabicExamQuestions[arabicExamIndex],total=arabicExamQuestions.length,pct=Math.round((arabicExamIndex+1)/total*100);
+ document.getElementById('arabicExamContent').innerHTML='<div class="exam-counter">QUESTION '+(arabicExamIndex+1)+' OF '+total+'</div><div class="exam-progress"><span style="width:'+pct+'%"></span></div><div class="exam-question" dir="auto">'+esc(q.q)+'</div><label class="exam-answer-label" for="arabicExamAnswer">Your answer</label><textarea id="arabicExamAnswer" class="exam-answer-box" placeholder="Write your answer here..." oninput="arabicExamAnswers[arabicExamIndex]=this.value" dir="auto">'+esc(arabicExamAnswers[arabicExamIndex])+'</textarea><div class="exam-controls"><button class="exam-secondary" type="button" onclick="previousArabicExamQuestion()" '+(arabicExamIndex===0?'disabled':'')+'>← Previous</button><button class="exam-primary" type="button" onclick="'+(arabicExamIndex===total-1?'finishArabicExam()':'nextArabicExamQuestion()')+'">'+(arabicExamIndex===total-1?'Finish exam':'Next question →')+'</button></div>';
+}
+function previousArabicExamQuestion(){saveArabicExamAnswer();if(arabicExamIndex>0)arabicExamIndex--;renderArabicExamQuestion()}
+function nextArabicExamQuestion(){saveArabicExamAnswer();if(arabicExamIndex<arabicExamQuestions.length-1)arabicExamIndex++;renderArabicExamQuestion()}
+function finishArabicExam(){
+ saveArabicExamAnswer();const answered=arabicExamAnswers.filter(x=>x.trim()).length;
+ document.getElementById('arabicExamContent').innerHTML='<h3 class="exam-finish-title">Exam completed</h3><p class="exam-finish-sub">You answered '+answered+' of '+arabicExamQuestions.length+' questions. Review your responses below and open each model answer when ready. This is a written exam, so answers are not auto-graded.</p><div class="exam-review">'+arabicExamQuestions.map((q,i)=>'<article class="exam-review-item"><h3 dir="auto">'+(i+1)+'. '+esc(q.q)+'</h3><div class="exam-student-answer" dir="auto"><b>Your answer:</b><br>'+esc(arabicExamAnswers[i]||'Not answered')+'</div><details><summary>Show model answer</summary><div class="exam-model-answer" dir="auto">'+esc(q.a)+'</div></details></article>').join('')+'</div><div class="exam-controls"><button class="exam-secondary" type="button" onclick="startArabicExam()">Retake exam</button><button class="exam-primary" type="button" onclick="closeArabicExam()">Close review</button></div>';
+}
+document.getElementById('arabicExamModal')?.addEventListener('click',e=>{if(e.target.id==='arabicExamModal')closeArabicExam()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArabicExam()});
 renderWeekOptions();
 
 render();
