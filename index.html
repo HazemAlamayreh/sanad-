@@ -1,1 +1,362 @@
-<!-- Sanad study dashboard -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sanad | Grade 8 Study Mission</title>
+<style>
+:root{--navy:#182647;--blue:#3567d8;--violet:#7654d8;--mint:#27a77a;--gold:#e6ae3b;--paper:#f4f6fc;--ink:#17223b;--muted:#69758c;--line:#e2e8f2;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.48 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{color:white;background:linear-gradient(122deg,#172a55,#315bb5 58%,#7654c9);padding:25px max(18px,calc((100vw - 1180px)/2));position:relative;overflow:hidden}
+header:after{content:"";position:absolute;width:300px;height:300px;border:1px solid #ffffff22;border-radius:50%;right:-70px;top:-180px;box-shadow:0 0 0 35px #ffffff0a,0 0 0 75px #ffffff08}
+.headrow{display:flex;justify-content:space-between;align-items:center;gap:16px;position:relative;z-index:1}
+h1{margin:0;font-size:29px;letter-spacing:.2px}.subtitle{margin:5px 0 0;color:#e3eaff}
+.missionchip{background:#ffffff18;border:1px solid #ffffff45;border-radius:14px;padding:10px 14px;text-align:center;min-width:156px}
+.missionchip b{display:block;color:#ffe08a;font-size:20px}
+main{max-width:1180px;margin:18px auto;padding:0 16px 45px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:13px}
+.card,.panel{background:var(--white);border:1px solid var(--line);border-radius:17px;box-shadow:0 5px 18px #18294b0a}
+.card{padding:14px 16px}.card .label{font-size:12px;color:var(--muted)}.card strong{display:block;font-size:25px;margin-top:2px}
+.progress{height:9px;border-radius:99px;background:#e9edf6;overflow:hidden;margin-top:8px}.progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),#8c64dc);border-radius:99px;transition:width .5s}
+.mission{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;margin-bottom:14px}
+.missionbox{padding:15px 17px;border-radius:16px;background:linear-gradient(115deg,#fff,#f3f6ff);border:1px solid #dce5fa}
+.missionbox.reward{background:linear-gradient(115deg,#fffaf0,#fff4db);border-color:#f1dfb5}
+.mission h2{margin:0 0 5px;font-size:17px}.mission p{margin:0;color:#53617b;font-size:13px}
+.rewardbar{height:10px;background:#f1e4c4;border-radius:99px;margin-top:10px;overflow:hidden}.rewardbar span{display:block;width:0;height:100%;background:linear-gradient(90deg,#e3a62c,#f2cc66);transition:width .5s}
+.layout{display:grid;grid-template-columns:278px 1fr;gap:14px;align-items:start}
+.panel{padding:15px}.panel h2{font-size:18px;margin:0 0 10px}
+.subject{display:flex;justify-content:space-between;align-items:center;gap:7px;padding:9px 0;border-bottom:1px solid var(--line)}
+.pill{font-size:11px;padding:3px 8px;border-radius:99px;background:#edf2ff;color:#3e57a4;white-space:nowrap}
+.pill.estimated{background:#fff2d9;color:#94600d}.pill.revision{background:#f0e9ff;color:#714da9}.pill.done{background:#e7f7ef;color:#13724c}
+.milestone{display:flex;gap:9px;align-items:center;margin:11px 0;color:#53617a;font-size:13px}
+.medal{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#f1f4fb;font-size:18px;flex:none}
+.medal.unlocked{background:#fff1ca;box-shadow:inset 0 0 0 1px #f2d58a}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:10px 0 14px}
+.day{border:1px solid var(--line);background:white;border-radius:11px;padding:7px 3px;min-height:63px;text-align:center;cursor:pointer;transition:.18s transform,.18s box-shadow,.18s background;position:relative}
+.day:hover{transform:translateY(-3px);box-shadow:0 8px 18px #1e31551a}.day.active{background:#edf2ff;border:2px solid var(--blue)}
+.day.off{background:#fff9ee}.day.exam{border-bottom:3px solid #d49a2b}.day small{display:block;color:var(--muted);font-size:10px}.day .dot{position:absolute;top:4px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--mint)}
+.dayhead{display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap}
+.dayhead h2{margin:0}
+.daymeta{font-size:12px;color:var(--muted);margin:4px 0 8px}
+.event{border-radius:11px;border:1px dashed #d7a449;background:#fff9eb;color:#6f4b0e;padding:10px 12px;margin:8px 0;font-size:13px}
+.event.final{border-color:#9a83d8;background:#f8f4ff;color:#573d93}
+.task{border:1px solid var(--line);border-radius:13px;padding:11px 12px;margin:8px 0;background:white;transition:background .25s,border .25s,transform .18s;animation:arrive .25s ease both}
+@keyframes arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.task:hover{transform:translateY(-1px)}.task.complete{background:#f0faf4;border-color:#b9e5cb}
+.taskline{display:flex;align-items:flex-start;gap:10px}.taskline input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--mint);flex:none;cursor:pointer}
+.tasktitle{font-weight:750;flex:1}.task.complete .tasktitle{text-decoration:line-through;color:#698174}
+.taskdetail{margin:6px 0 0 30px;color:#48556f;white-space:pre-line;font-size:13px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 0 30px}
+.meta span{font-size:10px;padding:3px 8px;border-radius:99px;background:#f0f3f8;color:#53617a}
+.meta .estimated{background:#fff2d9;color:#94600d}.meta .revision{background:#f0e9ff;color:#714da9}.meta .success{background:#e7f7ef;color:#13724c}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid var(--line);border-radius:9px;padding:7px 11px;background:white;font:inherit;cursor:pointer}
+.btn.primary{background:var(--blue);color:white;border-color:var(--blue)}.btn:hover{filter:brightness(.97);transform:translateY(-1px)}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=text],input[type=number],input[type=date],textarea,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;font:inherit}
+textarea{min-height:85px}.hidden{display:none}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:20;background:#14264b;color:white;border-radius:14px;padding:12px 18px;box-shadow:0 12px 30px #15244440;transition:.3s;max-width:min(92vw,520px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}.toast b{color:#ffdc88}
+#confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:15}
+.conf{position:absolute;top:-20px;width:8px;height:13px;border-radius:2px;animation:fall 1.2s linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(650deg);opacity:.1}}
+.summary{background:#f3f6fc;border:1px solid #e1e8f5;border-radius:11px;padding:10px 12px;color:#4d5a74;font-size:13px;margin:8px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.mission{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.headrow{align-items:flex-start;flex-direction:column}.missionchip{min-width:0}.days{grid-template-columns:repeat(4,1fr)}.formgrid{grid-template-columns:1fr}}
+@media print{body{background:white}header{padding:12px 18px}.cards,.mission,.layout>aside,.days,.actions,.toast,#confetti{display:none!important}.layout{display:block}main{margin:0;max-width:none}.panel{box-shadow:none;border:0;padding:0}.task{break-inside:avoid}}
+
+.weekly-panel{margin:0 0 14px}
+.weekly-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.weekly-heading h2{margin:0 0 4px;font-size:19px}
+.weekly-quick{display:flex;gap:7px;flex-wrap:wrap}
+.week-options{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+.week-option{display:flex;align-items:flex-start;gap:9px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#fbfcff;cursor:pointer;min-width:0}
+.week-option:has(input:checked){border-color:#6d86d8;background:#f0f4ff;box-shadow:inset 0 0 0 1px #6d86d8}
+.week-option input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--blue);flex:none}
+.week-option strong{display:block;font-size:14px}.week-option small{display:block;color:var(--muted);font-size:11px}
+.weekly-bottom{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:13px}
+.weekly-bottom #weekSelectionHint{font-size:12px;color:var(--muted)}
+.weekly-note{font-size:11px;color:#69758c;margin-top:8px}
+#weeklyPrintArea{display:none}
+@media(max-width:850px){.week-options{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.week-options{grid-template-columns:1fr}}
+@media print{
+ @page{size:A4 landscape;margin:7mm}
+ body.printing{background:white!important}
+ body.printing>*:not(#weeklyPrintArea){display:none!important}
+ body.printing #weeklyPrintArea{display:block!important;position:static!important;width:100%!important;color:#17223b!important}
+ body.printing .weekly-page{height:192mm;max-height:192mm;overflow:hidden;page-break-after:always;break-after:page;display:flex;flex-direction:column}
+ body.printing .weekly-page:last-child{page-break-after:auto;break-after:auto}
+ body.printing .weekly-report-header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #243d72;padding:0 0 5mm;margin-bottom:3mm}
+ body.printing .weekly-report-header h1{font-size:18pt;color:#1b2c55;margin:0}
+ body.printing .weekly-report-header p{font-size:8pt;color:#66718a;margin:1mm 0 0}
+ body.printing .weekly-report-meta{text-align:right;font-size:8pt;color:#394a70}
+ body.printing .weekly-report-columns{display:grid;grid-template-columns:1fr 1fr;gap:5mm;flex:1;min-height:0}
+ body.printing .weekly-report-day{border:1px solid #dce3ef;border-radius:2mm;padding:2mm 2.2mm;margin-bottom:2mm;break-inside:avoid}
+ body.printing .weekly-report-day h3{font-size:8.5pt;margin:0 0 1mm;color:#23427d;border-bottom:1px solid #e8edf5;padding-bottom:1mm}
+ body.printing .weekly-report-event{font-size:6.4pt;color:#7a5816;background:#fff8e9;padding:1mm 1.5mm;margin-bottom:1mm}
+ body.printing .weekly-report-task{padding:.65mm 0;border-bottom:1px dotted #e7ebf2;break-inside:avoid}
+ body.printing .weekly-report-task:last-child{border-bottom:0}
+ body.printing .weekly-task-top{display:flex;gap:1.2mm;align-items:flex-start;font-size:7pt;line-height:1.15}
+ body.printing .weekly-check{font-size:8pt;width:3.5mm;flex:none;color:#244d91}
+ body.printing .weekly-subject{font-weight:700;color:#31559c;min-width:19mm;max-width:23mm;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+ body.printing .weekly-task-title{font-weight:650;flex:1}
+ body.printing .weekly-minutes{font-size:6.2pt;color:#66718a;white-space:nowrap}
+ body.printing .weekly-task-detail{font-size:6.1pt;line-height:1.12;color:#657089;margin-left:4.7mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ body.printing .weekly-report-footer{font-size:6.5pt;color:#6d7890;border-top:1px solid #e6ebf3;padding-top:1.5mm;margin-top:1mm}
+}
+
+</style>
+</head>
+<body>
+<header>
+ <div class="headrow">
+  <div><h1>Sanad’s Study Mission</h1><p class="subtitle">Grade 8 • First-pass mastery before 12 December • Then revision mode</p></div>
+  <div class="missionchip"><span>MISSION TARGET</span><b>95%+ by Dec 11</b><span style="font-size:11px;color:#e6eaff">One task at a time. Keep going.</span></div>
+ </div>
+</header>
+<main>
+<div class="cards">
+ <div class="card"><span class="label">First-pass material completed</span><strong id="firstPct">0%</strong><div class="progress"><span id="firstBar"></span></div><span class="label">Target: at least 95% by Dec 11</span></div>
+ <div class="card"><span class="label">Tasks completed</span><strong id="doneCount">0</strong><span class="label" id="taskTotal">out of all planned tasks</span></div>
+ <div class="card"><span class="label">XP points earned</span><strong id="xp">0 XP</strong><span class="label" id="rank">Starter level</span></div>
+ <div class="card"><span class="label">Current study streak</span><strong id="streak">0 days</strong><span class="label">A little progress every day</span></div>
+</div>
+<div class="mission">
+ <div class="missionbox">
+  <h2>🚀 The 95% First-Pass Mission</h2>
+  <p>Finish the first study of all listed subjects by 11 December. From 12 December onward, the plan switches to revision only. School days start after 3:00 PM; Fridays and Sundays are study holidays.</p>
+  <div class="progress"><span id="missionBar"></span></div>
+  <p id="missionText" style="margin-top:7px">Your progress will update every time you complete a first-pass task.</p>
+ </div>
+ <div class="missionbox reward">
+  <h2>🖥️ Sanad’s Computer Goal</h2>
+  <p>Every completed task earns 10 XP. Keep building your effort record. When the study and revision missions are complete, celebrate your progress with your family and review the agreed reward goal together.</p>
+  <div class="rewardbar"><span id="rewardBar"></span></div>
+  <p id="rewardText" style="margin-top:7px;color:#805b17">0 XP earned • First milestone: 50 XP</p>
+ </div>
+</div>
+
+<section class="panel weekly-panel">
+ <div class="weekly-heading">
+  <div><h2>Weekly PDF Reports</h2><div class="daymeta">Select the weeks you want. Each selected week will be prepared as one separate A4 landscape page.</div></div>
+  <div class="weekly-quick"><button class="btn" onclick="selectAllWeeks(true)">Select all</button><button class="btn" onclick="selectAllWeeks(false)">Clear</button></div>
+ </div>
+ <div id="weekOptions" class="week-options"></div>
+ <div class="weekly-bottom">
+  <button class="btn primary" onclick="printSelectedWeeks()">Create PDF / Print selected weeks</button>
+  <span id="weekSelectionHint">Choose one or more weeks above.</span>
+ </div>
+ <div class="weekly-note">A print window will open. Choose <b>Save as PDF</b> as the destination. Selecting all four weeks creates a four-page PDF, one page per week.</div>
+</section>
+
+<div class="layout">
+<aside class="panel">
+ <h2>Subjects & coverage</h2><div id="subjects"></div>
+ <h2 style="margin-top:17px">Achievement badges</h2><div id="badges"></div>
+ <div class="summary"><b>Study rhythm</b><br>School days: study from 3:00 PM, usually 4–5 tasks. Fridays and Sundays: longer study windows. Exam days: the remaining day is used for revision for the next exam.</div>
+ <div class="actions"><button class="btn" onclick="exportData()">Export backup</button><label class="btn">Import backup<input id="importfile" type="file" accept="application/json" hidden onchange="importData(event)"></label></div>
+</aside>
+<section class="panel">
+ <div class="dayhead"><div><h2>Daily task board</h2><div class="daymeta">Pick any date to see the exact tasks, pages and completion status.</div></div><button class="btn" onclick="window.print()">Print selected day</button></div>
+ <div class="days" id="days"></div>
+ <div class="dayhead"><h2 id="daytitle">Today’s tasks</h2><button class="btn primary" onclick="openEditor()">+ Add task</button></div>
+ <div class="daymeta" id="daymeta"></div><div id="events"></div><div id="tasklist"></div>
+</section>
+</div>
+<div class="panel hidden" id="editor" style="margin-top:14px">
+ <h2 id="editTitle">Add a task</h2>
+ <div class="formgrid">
+  <input id="fdate" type="date"><input id="fsubject" type="text" placeholder="Subject">
+  <input id="ftitle" type="text" placeholder="Task title"><input id="fminutes" type="number" min="5" max="300" step="5" value="40" placeholder="Minutes">
+  <select id="fstatus"><option value="confirmed">Confirmed material</option><option value="estimated">Estimated / needs confirmation</option></select>
+  <select id="fphase"><option value="first">First-pass study</option><option value="revision">Revision</option></select>
+ </div>
+ <p><textarea id="fdetail" placeholder="Pages, lessons and what to complete..."></textarea></p>
+ <div class="actions"><button class="btn primary" onclick="saveTask()">Save task</button><button class="btn" onclick="closeEditor()">Cancel</button></div>
+</div>
+<footer>Progress is saved on this browser/device. Export a backup before changing devices. The reward tracker is a motivation tool; the actual reward remains a family agreement.</footer>
+</main>
+<div id="weeklyPrintArea" aria-hidden="true"></div>
+<div id="confetti"></div><div id="toast" class="toast"></div>
+<script>
+const initialTasks=[{"date": "2026-11-27", "subject": "Physics", "title": "Physics 9.1c – Speed + Study Sheet 3", "detail": "Study 9.1c Speed from the coursebook and complete/review Study Sheet 3. This also prepares the school task due 30 November.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-27", "subject": "Math", "title": "Unit 1 – Significant Figures, Powers & Standard Form (Lessons 1.1–1.2)", "detail": "1.1 STEM: Powers of 10. 1.2 Calculating and estimating. Use the student book, workbook and Math copybook.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-27", "subject": "English", "title": "Vocabulary – Dealing with Teenage Anger", "detail": "Unit 4, “This is vital!”, Text 1. Main Book pages 62–63. Review the PowerPoint slides, worksheets and vocabulary list on LMS under “Main Book Texts”.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-27", "subject": "Arabic", "title": "نص «في البندقية»", "detail": "دراسة النص من الورقة الدراسية: فهم الأفكار والمعاني، ثم حل الأسئلة المحددة على الورقة.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-27", "subject": "French", "title": "Unité 6 – Compréhension écrite", "detail": "Unité 6: Défense d’entrer! Livre page 73, exercises 1–4. First study and understand the text.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-28", "subject": "Math", "title": "Unit 1 – Lesson 1.3: Indices + practice", "detail": "Study indices and practise the related questions. Use Study Sheet 1 and the student book/workbook.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-28", "subject": "Math", "title": "Math school task – Unit 5 Past Paper Booklet", "detail": "Complete the assigned Unit 5 worksheet: Inequalities, Equations & Formulae. Finish before school delivery on 30 November.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-28", "subject": "Biology", "title": "9Ba – Reactions in Plants", "detail": "Start the Biology syllabus. Coursebook pages 6–9. Study Sheet 1. Workbook pages 4–6 (page 7 is excluded).", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-28", "subject": "English Writing", "title": "Unit 8 – Informal Letters", "detail": "Successful Writing Book pages 40–45. Review the PowerPoint presentation and informal letter checklist on Google Classroom under “Checkpoint Exam Material”. Write one short informal letter using the checklist.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-29", "subject": "Physics", "title": "Physics – Unit 1, Lesson 2", "detail": "Study the second lesson from the class notes/coursebook. The exact lesson title is not visible in the supplied material, so confirm its title with the teacher; do not skip the lesson.", "minutes": 40, "status": "estimated", "phase": "first", "done": false}, {"date": "2026-11-29", "subject": "Chemistry", "title": "Chemistry 9Fe – assignment preparation", "detail": "Study 9Fe pages 84–85 and Workbook page 60, questions 1, 2, 4 and 5. Prepare the Formative Assessment and finish all preparation before the 30 November / 1 December school delivery dates.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-29", "subject": "Math", "title": "Unit 3 – Quadratics (Lessons 3.1–3.2)", "detail": "3.1 Arithmetic and quadratic sequences. 3.2 Geometric sequences. Use student book, workbook and Study Sheet 2.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-29", "subject": "Arabic", "title": "نص «قمة في حجم بيض الدجاج»", "detail": "دراسة النص من الورقة الدراسية: الفهم، الأفكار الرئيسة، والمفردات والأسئلة المحددة.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-29", "subject": "Chemistry", "title": "8F Reactivity – Coursebook first section", "detail": "Study coursebook pages 74–79. Final exam material excludes pages 80–81; the remaining included pages continue in the next Chemistry sessions.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-30", "subject": "Chemistry", "title": "8F Reactivity – Coursebook remaining pages", "detail": "Study coursebook pages 82–85. Pages 80–81 are excluded from the final exam material.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-30", "subject": "English", "title": "Vocabulary – The Little Chick", "detail": "Unit 4, “This is vital!”, The Little Chick. Main Book pages 68–70. Review the PowerPoint slides under “Main Book Texts” on LMS.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-30", "subject": "Arabic", "title": "Grammar – الجملة الاسمية (صور خبر المبتدأ)", "detail": "دراسة القاعدة من الكتاب وورقة العمل والدفتر، مع حل أمثلة وتطبيقات.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-11-30", "subject": "French", "title": "French Reading / Recording – preparation", "detail": "Prepare the assigned French reading/recording task using Unité 6, page 73. Complete preparation before the school delivery on 2 December.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-01", "subject": "Math", "title": "Unit 3 – Quadratics (Lessons 3.3–3.5)", "detail": "3.3 Expanding. 3.4 Factorizing. 3.5 Solving quadratic equations. Practise examples from the student book and workbook.", "minutes": 50, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-01", "subject": "Biology", "title": "9Bb – Plant Adaptations", "detail": "Study the 9Bb section using Study Sheet 1 and the specified coursebook material (included pages only). Workbook pages 8–9 and class copybook.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-01", "subject": "French", "title": "French Reading / Recording – final preparation", "detail": "Practise the reading/recording task, check pronunciation/understanding and finish before school delivery on 2 December.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-01", "subject": "English Writing", "title": "Unit 10 – For-and-Against Essays", "detail": "Successful Writing Book pages 64–70. Review the PowerPoint presentation and Study Sheet under “Checkpoint Exam Material”. Plan and write one short for-and-against paragraph.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-02", "subject": "Koala", "title": "Koala preparation – Block 1", "detail": "Focused preparation using the school's Koala material and practice activities. 60 minutes.", "minutes": 60, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-02", "subject": "Koala", "title": "Koala preparation – Block 2", "detail": "Continue practice; focus on understanding the questions and correcting errors. 60 minutes.", "minutes": 60, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-02", "subject": "Koala", "title": "Koala preparation – Block 3", "detail": "Complete today's 3-hour Koala preparation target. Note anything to revisit tomorrow.", "minutes": 60, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-02", "subject": "French", "title": "Final Writing French – first practice", "detail": "Prepare the assigned French writing task using Fiche de travail (2) and the class writing topic. Finish before delivery on 5 December.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-03", "subject": "Koala", "title": "Koala preparation – Block 4", "detail": "Focused practice from the school's Koala material. 60 minutes.", "minutes": 60, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-03", "subject": "Koala", "title": "Koala preparation – Block 5", "detail": "Continue practice and review errors. 60 minutes.", "minutes": 60, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-03", "subject": "Koala", "title": "Koala preparation – Block 6", "detail": "Complete the second 3-hour preparation day. Koala preparation is now complete before the 4 December assessment.", "minutes": 60, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-03", "subject": "French", "title": "Final Writing French – final preparation", "detail": "Complete a timed writing practice and check the required structure. Finish before the 5 December school assessment.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-04", "subject": "Koala", "title": "KOALA ASSESSMENT – school assessment", "detail": "Assessment duration: approximately 30 minutes. After the assessment, use the remaining day for the study tasks below.", "minutes": 30, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-04", "subject": "Biology", "title": "9Bc – Plant Products", "detail": "Study 9Bc Plant Products from Study Sheet 1 and included coursebook material. Complete workbook page 11 and related copybook notes.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-04", "subject": "Chemistry", "title": "8F Reactivity – Workbook (pp.52–56)", "detail": "Complete included Workbook pages 52–56. Pages 57–58 are excluded from the final exam material.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-04", "subject": "Arabic", "title": "Grammar – الأسماء الخمسة", "detail": "دراسة القاعدة من الكتاب وورقة العمل والدفتر، مع حل التطبيقات المحددة.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-04", "subject": "Math", "title": "Unit 4 – Constructions (Lessons 4.1–4.2)", "detail": "4.1 Constructing shapes. 4.2 Constructions 1. Practise constructions with the required instruments.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-05", "subject": "Chemistry", "title": "8F Reactivity – Workbook (pp.59–60)", "detail": "Complete included Workbook pages 59–60. Pages 57–58 are excluded. Include any assigned questions from page 60.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-05", "subject": "Biology", "title": "Biology – coursebook consolidation", "detail": "Review included coursebook pages 12–13 and 16–19. Excluded pages: 10, 11, 14 and 15. Connect 9Ba, 9Bb and 9Bc topics.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-05", "subject": "Math", "title": "Unit 4 – Construction (Lesson 4.3) + practice", "detail": "4.3 Constructions 2. Practise all three Unit 4 lessons and the Past Paper Booklet worksheet on Constructions.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-05", "subject": "English", "title": "Grammar – Unit 18: Reported Speech", "detail": "Study Unit 18 Reported Speech. Grammar Book pages 100–105 and the PowerPoint slides in LMS under “Grammar”.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-06", "subject": "Arabic", "title": "Grammar – الأفعال المبنية: الفعل الماضي", "detail": "دراسة الفعل الماضي من الكتاب وورقة العمل والدفتر، مع تطبيقات على الإعراب. Include the prescribed writing point: كتابة ألف التأنيث في الأسماء بعد الهمزة.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-06", "subject": "Chemistry", "title": "Chemistry – Study Sheet 1", "detail": "Study and annotate Chemistry Study Sheet (1) for 8F Reactivity.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-06", "subject": "Chemistry", "title": "Chemistry – Lab Reports 1 & 2", "detail": "Review Lab Reports 1 and 2; understand the purpose, results and key conclusions.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-06", "subject": "Biology", "title": "Biology – Workbook pages 12–13 and 15–19", "detail": "Complete the included Workbook sections on pages 12–13 and 15–19. Excluded pages are 7, 10 and 14.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-06", "subject": "English", "title": "Comprehension – unseen passage", "detail": "Practise an unseen passage using the comprehension passages studied in class. Answers are available on LMS under “Comprehension”.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-07", "subject": "English Writing", "title": "Final Writing English – school assessment", "detail": "School assessment date. The three topics were prepared beforehand: Unit 8 Informal Letters, Unit 10 For-and-Against Essays, Unit 19 Reviews.", "minutes": 30, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-07", "subject": "Math", "title": "Unit 5 – Inequalities, Equations and Formulae (5.1–5.3)", "detail": "5.1 Substitution. 5.2 Inequalities. 5.3 Using index laws. Practise examples and the relevant Past Paper Booklet worksheet.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-07", "subject": "French", "title": "Unité 6 – Vocabulaire & Communication", "detail": "Vocabulaire: page 74 exercises 1–2; page 75 exercises 3, 4, 5 (“Bon à savoir”). Communication: demander/donner conseil, page 76 exercises 1–2.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-07", "subject": "Arabic", "title": "Arabic Expression – final preparation", "detail": "تدريب على كتابة رسالة: المكان والتاريخ، المرسل إليه، التحية، صلب الرسالة، الخاتمة والتوقيع. مراجعة ترتيب الأفكار واللغة وعلامات الترقيم استعداداً لتقييم 8 ديسمبر.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-08", "subject": "Arabic", "title": "تقييم التعبير العربي – school assessment", "detail": "School assessment/delivery date. Preparation was completed before today.", "minutes": 30, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-08", "subject": "Chemistry", "title": "Chemistry – Worksheets 1 & 2", "detail": "Complete and review Chemistry Worksheets 1 and 2 for 8F Reactivity.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-08", "subject": "Biology", "title": "Biology – Worksheet 1 + Copybook", "detail": "Complete Biology Worksheet 1 and review all related copybook notes for 9Ba, 9Bb and 9Bc.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-08", "subject": "French", "title": "Unité 6 – Communication & Grammar", "detail": "Communication: obligation/interdiction, page 76 exercises 3–4. Grammar: affirmative response with si, page 78 exercises 2–3; impersonal verb falloir, page 79 exercise 6; verbs croire, éteindre and interdire in the present tense, page 79 exercise 7.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-09", "subject": "Computer", "title": "Final Computer – school assessment", "detail": "School assessment date. Preparation and project practice should be completed before today.", "minutes": 30, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-09", "subject": "Math", "title": "Unit 5 – Inequalities, Equations and Formulae (5.4–5.6)", "detail": "5.4 Expressions, equations, identities and formulae. 5.5 Solving equations. 5.6 Changing the subject. Practise from the student book and workbook.", "minutes": 50, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-09", "subject": "English", "title": "English – final syllabus consolidation", "detail": "Review both vocabulary texts (pp.62–63 and 68–70), Unit 18 Reported Speech (Grammar Book pp.100–105), and unseen comprehension passages.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-10", "subject": "Chemistry", "title": "Chemistry – Worksheets 3 & 4 + Copybook", "detail": "Complete Worksheets 3 and 4; review Chemistry copybook and LMS resources.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-10", "subject": "Social Studies", "title": "Social Studies – Lesson 1: البيئات الطبيعية", "detail": "Study Lesson 1: البيئات الطبيعية using the assigned school resources and the specified questions only.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-11", "subject": "Math", "title": "Math – full first-pass checklist", "detail": "Check Units 1, 3, 4, 5 and 6: Student Book, Workbook, Math copybook, Study Sheets 1, 2, 4 and Past Paper Booklet worksheets. Mark any weak lessons for revision.", "minutes": 50, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-11", "subject": "Chemistry", "title": "Chemistry – 8F Reactivity complete checklist", "detail": "Check coursebook pp.74–85 except 80–81; workbook pp.52–60 except 57–58; Study Sheet 1; Lab Reports 1–2; Worksheets 1–4; Copybook and LMS resources.", "minutes": 50, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-11", "subject": "Biology", "title": "Biology – complete first-pass checklist", "detail": "Check 9Ba Reactions in Plants, 9Bb Plant Adaptations, 9Bc Plant Products; Coursebook pp.6–19 except 10, 11, 14, 15; Workbook pp.4–19 except 7, 10, 14; Worksheet 1 and Copybook.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-11", "subject": "English", "title": "English – all four sections first-pass check", "detail": "Vocabulary: “Dealing with Teenage Anger” pp.62–63 and “The Little Chick” pp.68–70. Grammar: Unit 18 Reported Speech, Grammar Book pp.100–105. Comprehension: unseen passage/LMS. Writing: Units 8, 10 and 19 with assigned pages and resources.", "minutes": 55, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-11", "subject": "French", "title": "French – Unité 6 first-pass checklist", "detail": "Check comprehension p.73 ex.1–4; vocabulary pp.74–75; communication p.76 ex.1–4; grammar p.78 ex.2–3 and p.79 ex.6–7; workbook pp.56,57,58,59,62 with assigned exercises. First study pass complete before final exams.", "minutes": 50, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-12", "subject": "Math", "title": "Math revision – Unit 1", "detail": "Revise Significant Figures, Powers of 10, Standard Form, Calculating and Estimating, and Indices. Practise mixed questions.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-12", "subject": "Math", "title": "Math revision – Unit 3", "detail": "Revise arithmetic/quadratic sequences, geometric sequences, expanding, factorizing and solving quadratic equations.", "minutes": 50, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-12", "subject": "Math", "title": "Math revision – Unit 4", "detail": "Revise constructing shapes and Constructions 1 and 2. Practise constructions.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-12", "subject": "Math", "title": "Math revision – Study Sheet 1", "detail": "Solve selected questions from Study Sheet 1 and correct mistakes.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-13", "subject": "Math", "title": "Math revision – Unit 5 (Part 1)", "detail": "Revise substitution, inequalities and index laws (5.1–5.3).", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-13", "subject": "Math", "title": "Math revision – Unit 5 (Part 2)", "detail": "Revise expressions/equations/identities/formulae, solving equations and changing the subject (5.4–5.6).", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-13", "subject": "Math", "title": "Math revision – Unit 6", "detail": "Revise planning a survey, collecting data, averages/range, displaying and analysing data.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-13", "subject": "Math", "title": "Math revision – Study Sheets 2 and 4", "detail": "Complete selected Study Sheet 2 and Study Sheet 4 questions; correct errors.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-13", "subject": "Math", "title": "Math revision – Past Paper Booklet", "detail": "Practise mixed worksheets for significant figures, quadratics, constructions, inequalities/formulae and data.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-14", "subject": "Chemistry", "title": "Chemistry revision – Coursebook 8F Reactivity", "detail": "Revise included coursebook pp.74–85 except 80–81. Recall key reactions and concepts from the class material.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-14", "subject": "Chemistry", "title": "Chemistry revision – Workbook", "detail": "Review included workbook pp.52–60 except 57–58 and redo difficult questions.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-14", "subject": "Chemistry", "title": "Chemistry revision – Study Sheet 1", "detail": "Review Study Sheet 1 and practise recalling key points without looking.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-14", "subject": "Chemistry", "title": "Chemistry revision – Lab Reports 1 & 2", "detail": "Review both lab reports and practise explaining the observations/conclusions.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-15", "subject": "French", "title": "French revision – Compréhension écrite", "detail": "Revise Unité 6 page 73 exercises 1–4. Re-read and answer without looking at notes.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-15", "subject": "French", "title": "French revision – Vocabulaire", "detail": "Revise Les vêtements p.74 and Les couleurs p.75, plus Fiche de travail (5).", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-15", "subject": "French", "title": "French revision – Communication", "detail": "Practise demander/donner conseil and obligation/interdiction using page 76 exercises 1–4.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-15", "subject": "French", "title": "French revision – Grammaire", "detail": "Revise the specified grammar points from pages 78–79 and complete quick practice.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-16", "subject": "English", "title": "English revision – Vocabulary Text 1", "detail": "Revise “Dealing with Teenage Anger”, Main Book pages 62–63, PowerPoint slides, worksheets and vocabulary list.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-16", "subject": "English", "title": "English revision – Vocabulary Text 2", "detail": "Revise “The Little Chick”, Main Book pages 68–70 and the related PowerPoint slides.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-16", "subject": "English", "title": "English revision – Reported Speech", "detail": "Revise Unit 18 Reported Speech and Grammar Book pages 100–105; practise transformations.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-16", "subject": "English", "title": "English revision – Unseen Comprehension", "detail": "Practise an unseen passage and review class comprehension passages and LMS answers.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-17", "subject": "Biology", "title": "Biology revision – 9Ba Reactions in Plants", "detail": "Revise 9Ba using Study Sheet 1, included Coursebook pages and workbook exercises.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-17", "subject": "Biology", "title": "Biology revision – 9Bb Plant Adaptations", "detail": "Revise 9Bb and practise explaining key adaptations from the study material.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-17", "subject": "Biology", "title": "Biology revision – 9Bc Plant Products", "detail": "Revise 9Bc and the included coursebook/workbook sections.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-17", "subject": "Biology", "title": "Biology revision – Worksheet 1 & Copybook", "detail": "Redo selected questions from Worksheet 1 and check related copybook notes.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-18", "subject": "Biology", "title": "Biology – full coursebook revision", "detail": "Review included Coursebook pp.6–19, excluding pages 10, 11, 14 and 15.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-18", "subject": "Biology", "title": "Biology – workbook revision", "detail": "Review included Workbook pp.4–19, excluding pages 7, 10 and 14.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-18", "subject": "Biology", "title": "Biology – Study Sheet 1 recall", "detail": "Recall the details for 9Ba, 9Bb and 9Bc from Study Sheet 1.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-18", "subject": "Biology", "title": "Biology – practice questions", "detail": "Complete a focused practice set and correct mistakes.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-18", "subject": "Biology", "title": "Biology – copybook and worksheet check", "detail": "Review Worksheet 1 and copybook notes; list final points to remember.", "minutes": 30, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-19", "subject": "Arabic", "title": "Arabic revision – نص «في البندقية»", "detail": "راجع النص من الورقة الدراسية، والأفكار والأسئلة المحددة.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-19", "subject": "Arabic", "title": "Arabic revision – نص «قمة في حجم بيض الدجاج»", "detail": "راجع النص من الورقة الدراسية، والأفكار والأسئلة المحددة.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-19", "subject": "Arabic", "title": "Arabic grammar revision – الجملة الاسمية", "detail": "راجع صور خبر المبتدأ من الكتاب وورقة العمل والدفتر.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-19", "subject": "Arabic", "title": "Arabic grammar revision – الأسماء الخمسة والفعل الماضي", "detail": "راجع القاعدتين وحل أمثلة تطبيقية.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-20", "subject": "Arabic", "title": "Arabic – full practice on both texts", "detail": "حل أسئلة تدريبية على «في البندقية» و«قمة في حجم بيض الدجاج».", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-20", "subject": "Arabic", "title": "Arabic grammar – full practice", "detail": "تدرب على الجملة الاسمية، الأسماء الخمسة، والفعل الماضي.", "minutes": 45, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-20", "subject": "Arabic", "title": "Arabic writing/spelling revision", "detail": "راجع كتابة ألف التأنيث في الأسماء بعد الهمزة، مع أمثلة وتطبيقات.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-20", "subject": "Arabic", "title": "Arabic – correct mistakes", "detail": "راجع الإجابات والأخطاء في النصوص والقواعد والكتابة.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-20", "subject": "Arabic", "title": "Arabic – final recap", "detail": "اعمل مراجعة سريعة لكل المحاور من دون حفظ إجابات جاهزة.", "minutes": 30, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-21", "subject": "Religion", "title": "Religion revision – Lessons 1 & 2", "detail": "راجع الدرسين 1 و2 من المنهاج المدرسي. هذه المادة كانت موزعة تقديرياً على خمسة دروس.", "minutes": 40, "status": "estimated", "phase": "revision", "done": false}, {"date": "2026-12-21", "subject": "Religion", "title": "Religion revision – Lesson 3", "detail": "راجع الدرس الثالث من الكتاب والدفتر.", "minutes": 35, "status": "estimated", "phase": "revision", "done": false}, {"date": "2026-12-21", "subject": "Religion", "title": "Religion revision – Lessons 4 & 5", "detail": "راجع الدرسين الرابع والخامس، ثم ارجع للنقاط الصعبة.", "minutes": 45, "status": "estimated", "phase": "revision", "done": false}, {"date": "2026-12-21", "subject": "Religion", "title": "Religion – full five-lesson recall", "detail": "اختبر نفسك في الدروس الخمسة من دون فتح الكتاب، ثم راجع النقاط التي لم تتذكرها.", "minutes": 40, "status": "estimated", "phase": "revision", "done": false}, {"date": "2026-12-22", "subject": "Social Studies", "title": "Social Studies revision – البيئات الطبيعية", "detail": "راجع الدرس الأول والأسئلة المحددة من الموارد المدرسية.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-22", "subject": "Social Studies", "title": "Social Studies revision – الأخطار والكوارث الطبيعية", "detail": "راجع الدرس الثاني واسترجع الأفكار الرئيسة.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-22", "subject": "Social Studies", "title": "Social Studies revision – إدارة الكوارث الطبيعية", "detail": "راجع الدرس الثالث والأمثلة الواردة في المادة.", "minutes": 35, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-22", "subject": "Social Studies", "title": "Social Studies – final recall", "detail": "راجع الدروس الثلاثة مع الأسئلة المحددة فقط، ثم صحح ما أخطأت به.", "minutes": 40, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-12-23", "subject": "Social Studies", "title": "Social Studies Final Exam – school date", "detail": "Final exam day. After the exam: no more study tasks are scheduled. Celebrate the effort and the work completed.", "minutes": 30, "status": "confirmed", "phase": "revision", "done": false}, {"date": "2026-11-30", "subject": "Religion", "title": "Religion – Estimated Lesson 1", "detail": "Estimated first of five lessons. Study directly from the Religion book and class notes; exact title to be confirmed when the official outline is available.", "minutes": 35, "status": "estimated", "phase": "first", "done": false}, {"date": "2026-12-05", "subject": "Religion", "title": "Religion – Estimated Lesson 2", "detail": "Estimated second of five lessons. Study directly from the Religion book and class notes; exact title to be confirmed.", "minutes": 35, "status": "estimated", "phase": "first", "done": false}, {"date": "2026-12-07", "subject": "Religion", "title": "Religion – Estimated Lesson 3", "detail": "Estimated third of five lessons. Study directly from the Religion book and class notes; exact title to be confirmed.", "minutes": 35, "status": "estimated", "phase": "first", "done": false}, {"date": "2026-12-09", "subject": "Religion", "title": "Religion – Estimated Lesson 4", "detail": "Estimated fourth of five lessons. Study directly from the Religion book and class notes; exact title to be confirmed.", "minutes": 35, "status": "estimated", "phase": "first", "done": false}, {"date": "2026-12-10", "subject": "Religion", "title": "Religion – Estimated Lesson 5", "detail": "Estimated fifth of five lessons. Complete the first pass of all five Religion lessons before 12 December. Exact title to be confirmed.", "minutes": 35, "status": "estimated", "phase": "first", "done": false}, {"date": "2026-12-01", "subject": "English Writing", "title": "Unit 19 – Reviews", "detail": "Successful Writing Book pages 104–106. Review the PowerPoint presentation and review samples on Google Classroom under “Checkpoint Exam Material”. Review a sample and plan one short review.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-08", "subject": "Social Studies", "title": "Social Studies – Lesson 2: الأخطار والكوارث الطبيعية", "detail": "Study Lesson 2 using the school resources and the specified questions only.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-09", "subject": "Social Studies", "title": "Social Studies – Lesson 3: إدارة الكوارث الطبيعية", "detail": "Study Lesson 3 using the school resources and the specified questions only.", "minutes": 35, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-10", "subject": "Math", "title": "Unit 6 – Collecting and Analysing Data (6.1–6.4) + resources", "detail": "6.1 STEM: Planning a survey; 6.2 Collecting data; 6.3 Calculating averages and range; 6.4 Displaying and analysing data. Use student book, workbook, Math copybook, and revise Study Sheets 1, 2 and 4 plus the relevant Past Paper Booklet worksheets.", "minutes": 75, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-10", "subject": "French", "title": "Unité 6 – Cahier d’exercices", "detail": "Complete: page 56 exercises 1–2; page 57 exercise 2; page 58 exercise 2; page 59 exercise 5; page 62 exercise 2. This completes the first pass of the French workbook material.", "minutes": 40, "status": "confirmed", "phase": "first", "done": false}, {"date": "2026-12-06", "subject": "Computer", "title": "Final Computer – Java practical preparation", "detail": "Practise with the attached resources shown in the assignment: GetObject – Activity2.html, Java Practical worksheet.pdf, and Using_Java_Script_in_HTML_Final_2026.pdf. Recreate the required practical steps independently. Finish before the 9 December school assessment.", "minutes": 45, "status": "confirmed", "phase": "first", "done": false}];
+const events={
+'2026-11-30':{kind:'delivery',text:'School delivery: Physics 9.1c Speed + Study Sheet 3; Math Chapter 5 worksheet; Chemistry Formative Assessment. Preparation is scheduled before today.'},
+'2026-12-01':{kind:'delivery',text:'School delivery: Chemistry 9Fe pages 84–85 + Workbook p.60 (Q1, 2, 4, 5) / Formative Assessment. Finish the preparation beforehand.'},
+'2026-12-02':{kind:'delivery',text:'School delivery: French Recording / Reading task. Preparation is scheduled on 30 November and 1 December.'},
+'2026-12-04':{kind:'delivery',text:'KOALA ASSESSMENT: approximately 30 minutes. The remaining day is available for the first-pass study tasks shown below. Preparation: 3 hours on 2 Dec + 3 hours on 3 Dec.'},
+'2026-12-05':{kind:'delivery',text:'School assessment: Final Writing French. Preparation is scheduled before today.'},
+'2026-12-07':{kind:'delivery',text:'School assessment: Final Writing English. All three writing units are prepared before today.'},
+'2026-12-08':{kind:'delivery',text:'School assessment: تقييم تعبير عربي. Preparation is scheduled before today.'},
+'2026-12-09':{kind:'delivery',text:'School assessment: Final Computer. Practical preparation is scheduled before today.'},
+'2026-12-10':{kind:'delivery',text:'Study Leave – full study day.'},
+'2026-12-12':{kind:'exam',text:'PHYSICS FINAL EXAM. After the exam, use the remaining day for Math revision.'},
+'2026-12-14':{kind:'exam',text:'MATH FINAL EXAM. After the exam, use the remaining day for Chemistry revision.'},
+'2026-12-15':{kind:'exam',text:'CHEMISTRY FINAL EXAM. After the exam, use the remaining day for French revision.'},
+'2026-12-16':{kind:'exam',text:'FRENCH FINAL EXAM. After the exam, use the remaining day for English revision.'},
+'2026-12-17':{kind:'exam',text:'ENGLISH FINAL EXAM. After the exam, use the remaining day for Biology revision.'},
+'2026-12-19':{kind:'exam',text:'BIOLOGY FINAL EXAM. After the exam, use the remaining day for Arabic revision.'},
+'2026-12-21':{kind:'exam',text:'ARABIC FINAL EXAM. After the exam, use the remaining day for Religion revision.'},
+'2026-12-22':{kind:'exam',text:'RELIGION FINAL EXAM. After the exam, use the remaining day for Social Studies revision.'},
+'2026-12-23':{kind:'exam',text:'SOCIAL STUDIES FINAL EXAM – last exam day. Afterwards: mission complete. Celebrate the effort and enjoy the day.'}
+};
+const subjectInfo=[
+['Physics','Confirmed: 9.1c Speed + Study Sheet 3; Lesson 2 title to confirm','estimated'],
+['Math','Confirmed: Units 1, 3, 4, 5 and 6 + Study Sheets / past papers','confirmed'],
+['Chemistry','Confirmed: 8F Reactivity + 9Fe delivery work','confirmed'],
+['Biology','Confirmed: 9Ba, 9Bb, 9Bc + pages / worksheet','confirmed'],
+['English','Confirmed: comprehension, vocabulary and Unit 18 grammar','confirmed'],
+['English Writing','Confirmed: Units 8, 10 and 19','confirmed'],
+['French','Confirmed: Unité 6 + French reading/writing tasks','confirmed'],
+['Arabic','Confirmed: texts, grammar and expression writing','confirmed'],
+['Religion','5 lessons – estimated until official list arrives','estimated'],
+['Social Studies','3 named lessons from school task details','confirmed'],
+['Koala','6 hours preparation scheduled before assessment','confirmed'],
+['Computer','Final practical attachments listed in the assignment','confirmed']
+];
+let tasks=initialTasks.map((t,i)=>({...t,id:i+1}));
+let selected='2026-11-27',editing=null;
+const key='sanadMissionDashboard_v4';
+try{const saved=JSON.parse(localStorage.getItem(key));if(Array.isArray(saved)&&saved.length===tasks.length)tasks=saved.map((x,i)=>({...tasks[i],...x}));}catch{}
+function dateAdd(v,n){let d=new Date(v+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+function dateLabel(v){return new Date(v+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
+function offDay(v){let day=new Date(v+'T12:00:00').getDay();return day===5||day===0}
+function firstTasks(){return tasks.filter(t=>t.phase==='first'&&t.date<'2026-12-12')}
+function completedFirst(){return firstTasks().filter(t=>t.done).length}
+function xp(){return tasks.filter(t=>t.done).length*10}
+function rank(v){if(v>=500)return 'Study Legend';if(v>=300)return 'Focus Champion';if(v>=150)return 'Momentum Master';if(v>=50)return 'Rising Star';return 'Mission Starter'}
+function badges(){
+ const n=tasks.filter(t=>t.done).length,fp=firstTasks().length?completedFirst()/firstTasks().length*100:0;
+ const defs=[
+ ['🌱','First Steps','Complete 5 tasks',n>=5],
+ ['⭐','Focus Star','Complete 15 tasks',n>=15],
+ ['🏅','Study Champion','Complete 30 tasks',n>=30],
+ ['🚀','First-Pass Finisher','Reach 95% first-pass completion',fp>=95],
+ ['🏆','Mission Complete','Complete all planned tasks',tasks.length>0&&n===tasks.length]
+ ];
+ document.getElementById('badges').innerHTML=defs.map(b=>`<div class="milestone"><div class="medal ${b[3]?'unlocked':''}">${b[0]}</div><div><b>${b[1]}</b><br><span>${b[2]}</span></div><span style="margin-left:auto;color:${b[3]?'#17865b':'#a3aabd'}">${b[3]?'Unlocked':'Locked'}</span></div>`).join('');
+}
+function streak(){
+ const days=[...new Set(tasks.filter(t=>t.done).map(t=>t.date))].sort();if(!days.length)return 0;
+ let count=1;for(let i=days.length-1;i>0;i--){let prev=dateAdd(days[i],-1);if(days[i-1]===prev)count++;else break;}return count;
+}
+function render(){
+ renderWeekOptions();
+ const totalDone=tasks.filter(t=>t.done).length, first=firstTasks(), firstDone=completedFirst(),pct=first.length?Math.round(firstDone/first.length*100):0;
+ document.getElementById('firstPct').textContent=pct+'%';document.getElementById('firstBar').style.width=pct+'%';
+ document.getElementById('missionBar').style.width=Math.min(100,pct/95*100)+'%';
+ document.getElementById('missionText').textContent=`${firstDone} of ${first.length} first-pass tasks completed. Target is at least 95% by 11 December.`;
+ document.getElementById('doneCount').textContent=totalDone;document.getElementById('taskTotal').textContent=`of ${tasks.length} planned tasks`;
+ document.getElementById('xp').textContent=xp()+' XP';document.getElementById('rank').textContent=rank(xp());
+ document.getElementById('streak').textContent=streak()+' days';
+ document.getElementById('rewardBar').style.width=Math.min(100,pct/95*100)+'%';
+ document.getElementById('rewardText').textContent=`${xp()} XP earned • ${Math.max(0,50-xp())} XP to the next badge`;
+ document.getElementById('subjects').innerHTML=subjectInfo.map(s=>{let sub=tasks.filter(t=>t.subject===s[0]),done=sub.filter(t=>t.done).length;return `<div class="subject"><div><b>${s[0]}</b><div style="font-size:11px;color:#738099">${s[1]}</div></div><span class="pill ${s[2]==='estimated'?'estimated':''}">${done}/${sub.length||0}</span></div>`}).join('');
+ badges();
+ let dates=[];for(let d='2026-11-27';d<='2026-12-23';d=dateAdd(d,1))dates.push(d);
+ document.getElementById('days').innerHTML=dates.map(d=>{let dayTasks=tasks.filter(t=>t.date===d),dn=dayTasks.filter(t=>t.done).length,ev=events[d];return `<button class="day ${d===selected?'active':''} ${offDay(d)?'off':''} ${ev&&ev.kind==='exam'?'exam':''}" onclick="selectDay('${d}')">${new Date(d+'T12:00:00').getDate()}<small>${new Date(d+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'})}</small><small>${dn}/${dayTasks.length} done</small>${ev?'<span class="dot"></span>':''}</button>`}).join('');
+ let dayTasks=tasks.filter(t=>t.date===selected),minutes=dayTasks.reduce((sum,t)=>sum+(Number(t.minutes)||0),0);
+ const ev=events[selected],finalPeriod=selected>='2026-12-12';
+ let rhythm=selected==='2026-12-10'?'Study Leave – full-day study window':(offDay(selected)?'Holiday – extra study capacity':'School day – study starts after 3:00 PM');
+ if(finalPeriod)rhythm='Exam period – revision tasks only; use the day after the exam';
+ document.getElementById('daytitle').textContent=dateLabel(selected)+' – Mission Board';
+ document.getElementById('daymeta').textContent=`${rhythm} • ${dayTasks.length} tasks • ${minutes} minutes (${(minutes/60).toFixed(1)} hours)`;
+ document.getElementById('events').innerHTML=ev?`<div class="event ${ev.kind==='exam'?'final':''}"><b>${ev.kind==='exam'?'EXAM DAY':'SCHOOL DELIVERY / ASSESSMENT'}:</b> ${ev.text}</div>`:'';
+ document.getElementById('tasklist').innerHTML=dayTasks.map(t=>`<div class="task ${t.done?'complete':''}"><div class="taskline"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id})"><div class="tasktitle">${esc(t.title)}</div></div><div class="taskdetail">${esc(t.detail)}</div><div class="meta"><span>${esc(t.subject)}</span><span>${t.minutes} min</span><span class="${t.status==='estimated'?'estimated':''}">${t.status==='estimated'?'Estimated / confirm':'Confirmed material'}</span><span class="${t.phase==='revision'?'revision':''}">${t.phase==='revision'?'Revision':'First-pass study'}</span><span class="${t.done?'success':''}">${t.done?'Completed ✓':'To do'}</span></div><div class="actions"><button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div></div>`).join('')||'<div class="summary">No tasks scheduled for this day.</div>';
+}
+function selectDay(d){selected=d;render()}
+const messages=[
+ 'Excellent work, Sanad! Another task completed. +10 XP earned! ⭐',
+ 'Strong focus! You are one step closer to your computer goal. Keep it up! 🖥️',
+ 'Well done, champion! Your consistency is building real progress. 🚀',
+ 'Great job! One less task on the board. Take a short break, then keep going. 🌟',
+ 'That is how a strong rank is built: focus, practice and steady effort. 🏅'
+];
+function toast(msg){let el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
+function confetti(){let root=document.getElementById('confetti');root.innerHTML='';for(let i=0;i<38;i++){let e=document.createElement('i');e.className='conf';e.style.left=Math.random()*100+'%';e.style.background=['#e8b643','#6b8ee9','#7ac9a5','#a78ae7','#f29a86'][i%5];e.style.animationDelay=(Math.random()*.35)+'s';e.style.transform=`rotate(${Math.random()*180}deg)`;root.appendChild(e)}setTimeout(()=>root.innerHTML='',1600)}
+function toggleTask(id){let t=tasks.find(x=>x.id===id);if(!t)return;t.done=!t.done;persist();render();if(t.done){let msg=messages[Math.floor(Math.random()*messages.length)];toast(msg);confetti();let n=tasks.filter(x=>x.done).length;if([5,15,30].includes(n))setTimeout(()=>toast(`🎖️ Badge unlocked! ${n} tasks completed. Keep that momentum, Sanad!`),600);if(t.phase==='first'&&completedFirst()/firstTasks().length>=.95)setTimeout(()=>toast('🏆 Brilliant! You reached the 95% first-pass mission target!'),650)}else toast('Task updated. You can tick it again when it is complete.')}
+function openEditor(){editing=null;document.getElementById('editTitle').textContent='Add a task';['fsubject','ftitle','fdetail'].forEach(k=>document.getElementById(k).value='');document.getElementById('fdate').value=selected;document.getElementById('fminutes').value=40;document.getElementById('fstatus').value='confirmed';document.getElementById('fphase').value='first';document.getElementById('editor').classList.remove('hidden')}
+function editTask(id){let t=tasks.find(x=>x.id===id);editing=id;document.getElementById('editTitle').textContent='Edit task';document.getElementById('fdate').value=t.date;document.getElementById('fsubject').value=t.subject;document.getElementById('ftitle').value=t.title;document.getElementById('fdetail').value=t.detail;document.getElementById('fminutes').value=t.minutes;document.getElementById('fstatus').value=t.status;document.getElementById('fphase').value=t.phase;document.getElementById('editor').classList.remove('hidden')}
+function closeEditor(){document.getElementById('editor').classList.add('hidden')}
+function saveTask(){let v={date:document.getElementById('fdate').value,subject:document.getElementById('fsubject').value,title:document.getElementById('ftitle').value,detail:document.getElementById('fdetail').value,minutes:Number(document.getElementById('fminutes').value)||40,status:document.getElementById('fstatus').value,phase:document.getElementById('fphase').value};if(!v.date||!v.title)return alert('Please add a date and task title.');if(editing)Object.assign(tasks.find(t=>t.id===editing),v);else tasks.push({...v,id:Math.max(0,...tasks.map(t=>t.id))+1,done:false});selected=v.date;persist();closeEditor();render();toast('Task saved. You have got this, Sanad!')}
+function deleteTask(id){if(confirm('Delete this task?')){tasks=tasks.filter(t=>t.id!==id);persist();render()}}
+function persist(){localStorage.setItem(key,JSON.stringify(tasks))}
+function exportData(){let a=document.createElement('a'),b=new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'});a.href=URL.createObjectURL(b);a.download='Sanad_Study_Mission_Backup.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;tasks=x;persist();render();toast('Backup restored successfully.')}catch{alert('Invalid backup file.')}};r.readAsText(f)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+const weekRanges=[
+ {id:'week1',name:'Week 1',start:'2026-11-27',end:'2026-12-03',label:'Nov 27 – Dec 3'},
+ {id:'week2',name:'Week 2',start:'2026-12-04',end:'2026-12-10',label:'Dec 4 – Dec 10'},
+ {id:'week3',name:'Week 3',start:'2026-12-11',end:'2026-12-17',label:'Dec 11 – Dec 17'},
+ {id:'week4',name:'Week 4',start:'2026-12-18',end:'2026-12-23',label:'Dec 18 – Dec 23'}
+];
+let selectedWeeks=[];
+function tasksForWeek(w){return tasks.filter(t=>t.date>=w.start&&t.date<=w.end).sort((a,b)=>a.date.localeCompare(b.date)||(a.subject||'').localeCompare(b.subject||''))}
+function renderWeekOptions(){
+ const host=document.getElementById('weekOptions');if(!host)return;
+ host.innerHTML=weekRanges.map(w=>{
+  const list=tasksForWeek(w),mins=list.reduce((a,t)=>a+(Number(t.minutes)||0),0);
+  return `<label class="week-option"><input type="checkbox" ${selectedWeeks.includes(w.id)?'checked':''} onchange="toggleWeekSelection('${w.id}',this.checked)"><span><strong>${w.name}</strong><small>${w.label}, 2026</small><small>${list.length} tasks • ${(mins/60).toFixed(1)} study hours</small></span></label>`;
+ }).join('');
+ updateWeekSelectionHint();
+}
+function toggleWeekSelection(id,checked){
+ if(checked&&!selectedWeeks.includes(id))selectedWeeks.push(id);
+ if(!checked)selectedWeeks=selectedWeeks.filter(x=>x!==id);
+ updateWeekSelectionHint();
+}
+function selectAllWeeks(checked){
+ selectedWeeks=checked?weekRanges.map(w=>w.id):[];
+ renderWeekOptions();
+}
+function updateWeekSelectionHint(){
+ const el=document.getElementById('weekSelectionHint');if(!el)return;
+ const count=selectedWeeks.length;
+ el.textContent=count?`${count} week${count===1?'':'s'} selected • ${count} PDF page${count===1?'':'s'} will be created.`:'Choose one or more weeks above.';
+}
+function reportText(s,max=150){
+ const clean=String(s||'').replace(/\s+/g,' ').trim();
+ return clean.length>max?clean.slice(0,max-1)+'…':clean;
+}
+function reportDay(date,w){
+ const dayTasks=tasks.filter(t=>t.date===date).sort((a,b)=>(a.subject||'').localeCompare(b.subject||''));
+ const event=events[date];
+ const dayName=dateLabel(date);
+ let eventHtml=event?`<div class="weekly-report-event"><b>${event.kind==='exam'?'EXAM':'SCHOOL / DELIVERY'}:</b> ${esc(reportText(event.text,175))}</div>`:'';
+ const items=dayTasks.map(t=>`<div class="weekly-report-task">
+  <div class="weekly-task-top"><span class="weekly-check">${t.done?'☑':'☐'}</span><span class="weekly-subject">${esc(t.subject)}</span><span class="weekly-task-title">${esc(t.title)}</span><span class="weekly-minutes">${Number(t.minutes)||0}m</span></div>
+  <div class="weekly-task-detail">${esc(reportText(t.detail,175))}</div>
+ </div>`).join('');
+ return `<section class="weekly-report-day"><h3>${esc(dayName)} <span style="font-weight:400;color:#77839a">• ${dayTasks.length} tasks</span></h3>${eventHtml}${items||'<div style="font-size:7pt;color:#7b8497">No tasks scheduled.</div>'}</section>`;
+}
+function weekReport(w){
+ const list=tasksForWeek(w),mins=list.reduce((a,t)=>a+(Number(t.minutes)||0),0);
+ const days=[];for(let d=w.start;d<=w.end;d=dateAdd(d,1))days.push(d);
+ const mid=Math.ceil(days.length/2),left=days.slice(0,mid),right=days.slice(mid);
+ const dayHtml=arr=>arr.map(d=>reportDay(d,w)).join('');
+ const done=list.filter(t=>t.done).length;
+ return `<article class="weekly-page">
+  <div class="weekly-report-header">
+   <div><h1>Sanad’s Weekly Study Report</h1><p>Grade 8 • Planned tasks, school assessments and revision</p></div>
+   <div class="weekly-report-meta"><b>${w.name}</b><br>${w.label}, 2026<br>${list.length} tasks • ${(mins/60).toFixed(1)} hours<br>${done} completed / ${list.length}</div>
+  </div>
+  <div class="weekly-report-columns"><div>${dayHtml(left)}</div><div>${dayHtml(right)}</div></div>
+  <div class="weekly-report-footer">☑ Completed • ☐ Not yet completed. Task details are shortened to fit this weekly printout; open the dashboard for the full instructions and pages. This report reflects the current dashboard data.</div>
+ </article>`;
+}
+function printSelectedWeeks(){
+ const chosen=weekRanges.filter(w=>selectedWeeks.includes(w.id));
+ if(!chosen.length){toast('Please select at least one week first.');return}
+ const area=document.getElementById('weeklyPrintArea');
+ area.innerHTML=chosen.map(weekReport).join('');
+ document.body.classList.add('printing');
+ const restore=()=>{document.body.classList.remove('printing');area.innerHTML='';window.removeEventListener('afterprint',restore)};
+ window.addEventListener('afterprint',restore);
+ setTimeout(()=>{window.print();},120);
+}
+
+renderWeekOptions();
+render();
+</script>
+</body></html>
