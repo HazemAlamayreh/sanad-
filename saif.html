@@ -162,6 +162,17 @@ body.pdf-exporting .weekly-report-footer{font-size:6.5pt!important;color:#6d7890
 .vocab-quiz-review-item{border:1px solid #e0e6f0;border-radius:10px;padding:11px;font-size:13px;line-height:1.5}
 @media(max-width:600px){#vocabQuizModal{padding:7px}.vocab-quiz-shell{max-height:calc(100vh - 14px);padding:15px}.vocab-quiz-head h2{font-size:18px}.vocab-quiz-question{font-size:16px}}
 
+
+.quiz-pass-sign{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#e5f7ee;color:#13734c;border:1px solid #b9e5ce;font-size:11px;font-weight:800;letter-spacing:.2px}
+.task-pass-status{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px 28px}
+.exam-pass-banner{border:1px solid #a9ddc1;background:#edfaf2;color:#126744;border-radius:12px;padding:14px;text-align:center;font-weight:800;margin:12px 0}
+.exam-not-passed{border:1px solid #f0d29d;background:#fff8e9;color:#80540d;border-radius:12px;padding:12px;margin:12px 0;font-size:13px;line-height:1.55}
+.exam-mark-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.exam-mark-controls button{border:0;border-radius:9px;padding:8px 11px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.exam-mark-yes{background:#e5f7ee;color:#13734c}.exam-mark-no{background:#fff0e9;color:#9b4a2d}
+.exam-mark-status{font-size:12px;font-weight:700;margin-top:7px;color:#64718a}
+.exam-mark-controls button:disabled{opacity:.45;cursor:not-allowed}
+
 </style>
 </head>
 <body>
@@ -288,6 +299,12 @@ let selected=start,editing=null;
 function plus(date,n){let d=new Date(date+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 function dayLabel(date){return new Date(date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
 function isOff(date){let w=new Date(date+'T12:00:00').getDay();return w===5||w===0}
+let quizProgress={fact:false,pompeii:false,arabic:false,arabicMarks:Array(27).fill(null),arabicAnswers:Array(27).fill('')};
+try{const savedQuizProgress=JSON.parse(localStorage.getItem('saifQuizProgress_v1')||'null');if(savedQuizProgress&&typeof savedQuizProgress==='object'){quizProgress={...quizProgress,...savedQuizProgress};if(!Array.isArray(quizProgress.arabicMarks)||quizProgress.arabicMarks.length!==27)quizProgress.arabicMarks=Array(27).fill(null);if(!Array.isArray(quizProgress.arabicAnswers)||quizProgress.arabicAnswers.length!==27)quizProgress.arabicAnswers=Array(27).fill('');}}catch{}
+function saveQuizProgress(){try{localStorage.setItem('saifQuizProgress_v1',JSON.stringify(quizProgress));}catch(e){console.warn('Could not save quiz progress',e);}}
+function quizPassed(id){return quizProgress[id]===true;}
+function quizPassBadge(id,label){return quizPassed(id)?'<span class="quiz-pass-sign">✓ '+esc(label)+' PASSED – 100% • COMPLETED</span>':'';}
+function renderTaskPassStatus(t){let badges=[];if(t.title.includes('ناقة صالح')||(t.phase==='revision'&&t.subject==='Arabic'&&!/grammar/i.test(t.title)))badges.push(quizPassBadge('arabic','ARABIC EXAM'));if(t.title.includes('Vocabulary – Is that a fact?')||(t.phase==='revision'&&t.subject==='English'))badges.push(quizPassBadge('fact','IS THAT A FACT'));if(t.title.includes('Vocabulary – Pompeii + worksheet')||(t.phase==='revision'&&t.subject==='English'))badges.push(quizPassBadge('pompeii','POMPEII'));badges=badges.filter(Boolean);return badges.length?'<div class="task-pass-status">'+badges.join('')+'</div>':'';}
 function render(){
  const done=tasks.filter(t=>t.done).length,p=tasks.length?Math.round(done/tasks.length*100):0;
  document.getElementById('pct').textContent=p+'%';document.getElementById('bar').style.width=p+'%';
@@ -307,6 +324,7 @@ function render(){
  <div class="tasktop"><input type="checkbox" ${t.done?'checked':''} onchange="toggle(${t.id})"><div class="tasktitle">${esc(t.title)}</div></div>
  <div class="details">${renderTaskDetails(t)}</div>
  <div class="meta"><span class="tag">${esc(t.subject)}</span><span class="tag">${t.minutes} min</span><span class="tag ${t.status==='estimated'?'est':'confirm'}">${t.status==='estimated'?'Estimated':'Confirmed'}</span><span class="tag ${t.phase==='revision'?'revision':''}">${t.phase==='revision'?'Revision':'First-pass study'}</span><span class="tag">${t.done?'Completed':'To do'}</span></div>
+ ${renderTaskPassStatus(t)}
  <div class="actions">${t.title.includes('ناقة صالح')?'<button class="btn primary" onclick="startArabicExam()">Start Exam</button>':''}${t.title.includes('Vocabulary – Is that a fact?')?'<button class="btn primary" onclick="startVocabQuiz(\'fact\')">Start Quiz</button>':''}${t.title.includes('Vocabulary – Pompeii + worksheet')?'<button class="btn primary" onclick="startVocabQuiz(\'pompeii\')">Start Quiz</button>':''}${t.phase==='revision'&&t.subject==='English'?'<button class="btn primary" onclick="startVocabQuiz(&quot;fact&quot;)">Revise: Is That a Fact?</button><button class="btn primary" onclick="startVocabQuiz(&quot;pompeii&quot;)">Revise: Pompeii</button>':''}${t.phase==='revision'&&t.subject==='Arabic'&&!/grammar/i.test(t.title)?'<button class="btn primary" onclick="startArabicExam()">Revise: Naqat Salih Exam</button>':''}<button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div>
  </div>`).join('')||'<p class="muted">No study tasks. Check the school delivery/exam note above.</p>';
 }
@@ -442,19 +460,32 @@ function printSelectedWeeks(){
  setTimeout(()=>window.print(),120);
 }
 const arabicExamQuestions=[{"q":"ما معنى شاهق؟","a":"عالٍ."},{"q":"ما معنى الجامد؟","a":"اليابس."},{"q":"ما معنى تدفقت؟","a":"سالت."},{"q":"ما معنى معدودة؟","a":"قليلة."},{"q":"ما معنى دررت؟","a":"صببت بغزارة."},{"q":"ما ضد الغباء؟","a":"الذكاء."},{"q":"ما ضد انتهاؤها؟","a":"ابتداؤها."},{"q":"ما ضد الكره؟","a":"الود."},{"q":"ما ضد ظهور؟","a":"اختفاء."},{"q":"عرفت الناقة باسمين اثنين، أذكرهما.","a":"ناقة صالح، وناقة الله."},{"q":"استنتج من الفقرة الخامسة الفكرة الرئيسة.","a":"خروج الناقة من الصخرة."},{"q":"أرفق الفكرة الرئيسة للفقرة الخامسة بفكرتين داعمتين.","a":"- تحلق القوم حول الناقة.\n- تحذير صالح قومه من إيذائها."},{"q":"أعطي دليلاً من النص على ثراء قوم ثمود.","a":"كان لأغنيائهم قصور في سهول المدينة، وكانت لهم بيوت منحوتة في الجبال."},{"q":"أعطي دليلاً على علو شأن صالح عليه السلام قبل أن يأمر قومه بعبادة الله.","a":"كان علمه محل احترام، وعقله موضع إقناع، وكلامه موضع تصديق."},{"q":"أعطي دليلاً على ظهور شعور الحقد والكره تجاه الناقة.","a":"اتسعت رقعة الكره في صدورهم."},{"q":"اتصف قوم ثمود بأنهم ............","a":"أقوياء البنية."},{"q":"ما النهاية التي حلت بالناقة؟","a":"عقر الناقة وقتلها."},{"q":"بماذا أهلك الله قوم ثمود؟","a":"بالصيحة."},{"q":"ما رد الفعل على خروج الناقة من الصخر؟","a":"الدهشة."},{"q":"ما رد الفعل على تقسيم الماء بين الناقة والقوم؟","a":"الاستياء والتذمر."},{"q":"ما رد الفعل على نزول العقاب بثمود؟","a":"الندم."},{"q":"ما أبرز القيم في النص؟","a":"- الإيمان بالله وطاعته.\n- طاعة الرسل.\n- الرفق بالحيوان.\n- الوفاء بالعهد.\n- الابتعاد عن الحقد والكره."},{"q":"اقترح عنواناً آخر مناسباً للنص، وعلل اختيارك.","a":"معجزة ناقة صالح؛ لأن النص يتحدث عن خروج الناقة من الصخرة بأمر الله."},{"q":"اختر التعبير الأجمل من وجهة نظرك، وعلل اختيارك.\nالتعبير الأول: تدفقت الدماء في عروقي كتدفق الماء في النهر.\nالتعبير الثاني: قلوبهم كالحجارة أو أشد قسوة.","a":"أختار التعبير الثاني؛ لأنه يدل على شدة قسوة قلوب قوم ثمود وعدم رحمتهم."},{"q":"ماذا تعلمت من قصة ناقة صالح عليه السلام؟","a":"تعلمت أن الله قادر على كل شيء، وأن علينا طاعة الله ورسله والرفق بالحيوان."},{"q":"فرّق في معنى كلمة «آية» في الجملتين:\n1. نريد آية من الله على نبوتك.\n2. أقرأ آية الكرسي بعد كل صلاة.","a":"1. معجزة.\n2. جزء من القرآن الكريم."},{"q":"فرّق في المعنى بين «ربتت» و«ربّت» في الجملتين:\n1. زال الخوف حين ربتت الصبية على عنقي.\n2. ربّت الأم أبناءها تربية صالحة.","a":"1. لمست برفق وحنان.\n2. نشّأت وعلّمت."}];
-let arabicExamIndex=0,arabicExamAnswers=Array(arabicExamQuestions.length).fill('');
-function startArabicExam(){arabicExamIndex=0;arabicExamAnswers=Array(arabicExamQuestions.length).fill('');document.getElementById('arabicExamModal').classList.add('open');document.body.style.overflow='hidden';renderArabicExamQuestion()}
-function closeArabicExam(){document.getElementById('arabicExamModal').classList.remove('open');document.body.style.overflow=''}
-function saveArabicExamAnswer(){const box=document.getElementById('arabicExamAnswer');if(box)arabicExamAnswers[arabicExamIndex]=box.value}
+let arabicExamIndex=0,arabicExamAnswers=Array(arabicExamQuestions.length).fill(''),arabicExamMarks=Array(arabicExamQuestions.length).fill(null);
+function startArabicExam(){if(quizPassed('arabic')){arabicExamAnswers=quizProgress.arabicAnswers.slice();arabicExamMarks=quizProgress.arabicMarks.slice();document.getElementById('arabicExamModal').classList.add('open');document.body.style.overflow='hidden';renderArabicExamReview();return;}arabicExamIndex=0;arabicExamAnswers=Array(arabicExamQuestions.length).fill('');arabicExamMarks=Array(arabicExamQuestions.length).fill(null);quizProgress.arabicAnswers=arabicExamAnswers.slice();quizProgress.arabicMarks=arabicExamMarks.slice();saveQuizProgress();document.getElementById('arabicExamModal').classList.add('open');document.body.style.overflow='hidden';renderArabicExamQuestion();}
+function closeArabicExam(){document.getElementById('arabicExamModal').classList.remove('open');document.body.style.overflow='';render();}
+function saveArabicExamAnswer(){const box=document.getElementById('arabicExamAnswer');if(box)arabicExamAnswers[arabicExamIndex]=box.value;quizProgress.arabicAnswers=arabicExamAnswers.slice();saveQuizProgress();}
 function renderArabicExamQuestion(){
  const q=arabicExamQuestions[arabicExamIndex],total=arabicExamQuestions.length,pct=Math.round((arabicExamIndex+1)/total*100);
  document.getElementById('arabicExamContent').innerHTML='<div class="exam-counter">QUESTION '+(arabicExamIndex+1)+' OF '+total+'</div><div class="exam-progress"><span style="width:'+pct+'%"></span></div><div class="exam-question" dir="auto">'+esc(q.q)+'</div><label class="exam-answer-label" for="arabicExamAnswer">Your answer</label><textarea id="arabicExamAnswer" class="exam-answer-box" placeholder="Write your answer here..." oninput="arabicExamAnswers[arabicExamIndex]=this.value" dir="auto">'+esc(arabicExamAnswers[arabicExamIndex])+'</textarea><div class="exam-controls"><button class="exam-secondary" type="button" onclick="previousArabicExamQuestion()" '+(arabicExamIndex===0?'disabled':'')+'>← Previous</button><button class="exam-primary" type="button" onclick="'+(arabicExamIndex===total-1?'finishArabicExam()':'nextArabicExamQuestion()')+'">'+(arabicExamIndex===total-1?'Finish exam':'Next question →')+'</button></div>';
 }
 function previousArabicExamQuestion(){saveArabicExamAnswer();if(arabicExamIndex>0)arabicExamIndex--;renderArabicExamQuestion()}
 function nextArabicExamQuestion(){saveArabicExamAnswer();if(arabicExamIndex<arabicExamQuestions.length-1)arabicExamIndex++;renderArabicExamQuestion()}
-function finishArabicExam(){
- saveArabicExamAnswer();const answered=arabicExamAnswers.filter(x=>x.trim()).length;
- document.getElementById('arabicExamContent').innerHTML='<h3 class="exam-finish-title">Exam completed</h3><p class="exam-finish-sub">You answered '+answered+' of '+arabicExamQuestions.length+' questions. Review your responses below and open each model answer when ready. This is a written exam, so answers are not auto-graded.</p><div class="exam-review">'+arabicExamQuestions.map((q,i)=>'<article class="exam-review-item"><h3 dir="auto">'+(i+1)+'. '+esc(q.q)+'</h3><div class="exam-student-answer" dir="auto"><b>Your answer:</b><br>'+esc(arabicExamAnswers[i]||'Not answered')+'</div><details><summary>Show model answer</summary><div class="exam-model-answer" dir="auto">'+esc(q.a)+'</div></details></article>').join('')+'</div><div class="exam-controls"><button class="exam-secondary" type="button" onclick="startArabicExam()">Retake exam</button><button class="exam-primary" type="button" onclick="closeArabicExam()">Close review</button></div>';
+function finishArabicExam(){saveArabicExamAnswer();renderArabicExamReview();}
+function setArabicExamMark(index,isCorrect){if(isCorrect&&!String(arabicExamAnswers[index]||'').trim()){alert('Write your answer before marking it as correct.');return;}arabicExamMarks[index]=!!isCorrect;quizProgress.arabicMarks=arabicExamMarks.slice();quizProgress.arabicAnswers=arabicExamAnswers.slice();if(arabicExamMarks.every(x=>x===true)){quizProgress.arabic=true;saveQuizProgress();render();}else{quizProgress.arabic=false;saveQuizProgress();}renderArabicExamReview();}
+function retryArabicExam(){quizProgress.arabic=false;quizProgress.arabicMarks=Array(arabicExamQuestions.length).fill(null);quizProgress.arabicAnswers=Array(arabicExamQuestions.length).fill('');saveQuizProgress();arabicExamMarks=Array(arabicExamQuestions.length).fill(null);arabicExamAnswers=Array(arabicExamQuestions.length).fill('');arabicExamIndex=0;renderArabicExamQuestion();}
+function renderArabicExamReview(){
+ const total=arabicExamQuestions.length,passedCount=arabicExamMarks.filter(x=>x===true).length,passed=passedCount===total;
+ if(passed){quizProgress.arabic=true;quizProgress.arabicAnswers=arabicExamAnswers.slice();quizProgress.arabicMarks=arabicExamMarks.slice();saveQuizProgress();}
+ const review=arabicExamQuestions.map((q,i)=>{
+  const answer=String(arabicExamAnswers[i]||'').trim();
+  const status=arabicExamMarks[i]===true?'<div class="exam-mark-status">✓ Marked correct</div>':(arabicExamMarks[i]===false?'<div class="exam-mark-status">Needs another attempt</div>':'<div class="exam-mark-status">Not checked yet</div>');
+  const model='<details><summary>Show model answer</summary><div class="exam-model-answer" dir="auto">'+esc(q.a)+'</div></details>';
+  const controls='<div class="exam-mark-controls"><button class="exam-mark-yes" type="button" onclick="setArabicExamMark('+i+',true)" '+(!answer?'disabled':'')+'>✓ My answer is correct</button><button class="exam-mark-no" type="button" onclick="setArabicExamMark('+i+',false)">Needs correction</button></div>';
+  return '<article class="exam-review-item"><h3 dir="auto">'+(i+1)+'. '+esc(q.q)+'</h3><div class="exam-student-answer" dir="auto"><b>Your answer:</b><br>'+esc(answer||'Not answered')+'</div>'+model+controls+status+'</article>';
+ }).join('');
+ const banner=passed?'<div class="exam-pass-banner">✓ PASSED – 100% • COMPLETED<br>27 / 27 answers checked as correct.</div>':'<div class="exam-not-passed"><b>NOT PASSED YET</b><br>'+passedCount+' / '+total+' answers marked correct. Compare each response with its model answer and mark all 27 correct. Any answer needing work means the exam must be attempted again.</div>';
+ const buttons=passed?'<button class="exam-primary" type="button" onclick="closeArabicExam()">Close completed exam</button>':'<button class="exam-secondary" type="button" onclick="retryArabicExam()">Retake all 27 questions</button><button class="exam-primary" type="button" onclick="closeArabicExam()">Close for now</button>';
+ document.getElementById('arabicExamContent').innerHTML=banner+'<p class="exam-finish-sub">Check every written response against the model answer. Completion is recorded only when all 27 are marked correct.</p><div class="exam-review">'+review+'</div><div class="exam-controls">'+buttons+'</div>';
 }
 document.getElementById('arabicExamModal')?.addEventListener('click',e=>{if(e.target.id==='arabicExamModal')closeArabicExam()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArabicExam()});
@@ -510,14 +541,13 @@ function nextVocabQuizQuestion(){
  else renderVocabQuizResult();
 }
 function renderVocabQuizResult(){
- const quiz=vocabQuizData[activeVocabQuizId],total=quiz.questions.length,pct=Math.round(vocabQuizScore/total*100);
- const review=quiz.questions.map((q,i)=>{
-  return '<div class="vocab-quiz-review-item"><b>'+(i+1)+'. '+esc(q.q)+'</b><br>Your answer: '+esc(q.options[vocabQuizResults[i].selected])+'<br>Correct answer: <b>'+esc(q.options[q.correct])+'</b></div>';
- }).join('');
- document.getElementById('vocabQuizContent').innerHTML=
-  '<div class="vocab-quiz-result"><h3>Quiz completed!</h3><strong>'+vocabQuizScore+' / '+total+'</strong><div>'+pct+'% correct</div><p class="muted">Review the correct answers below, then try again to improve your score.</p></div>'+
-  '<div class="vocab-quiz-review">'+review+'</div>'+
-  '<div class="vocab-quiz-controls"><button class="vocab-quiz-secondary" onclick="closeVocabQuiz()">Close</button><button class="vocab-quiz-primary" onclick="startVocabQuiz(activeVocabQuizId)">Try again</button></div>';
+ const quiz=vocabQuizData[activeVocabQuizId],total=quiz.questions.length,pct=Math.round(vocabQuizScore/total*100),passedNow=vocabQuizScore===total;
+ if(passedNow){quizProgress[activeVocabQuizId]=true;saveQuizProgress();render();}
+ const passed=quizPassed(activeVocabQuizId);
+ const review=quiz.questions.map((q,i)=>{const r=vocabQuizResults[i]||{selected:-1};const chosen=r.selected>=0?q.options[r.selected]:'No answer';return '<div class="vocab-quiz-review-item"><b>'+(i+1)+'. '+esc(q.q)+'</b><br>Your answer: '+esc(chosen)+'<br>Correct answer: <b>'+esc(q.options[q.correct])+'</b></div>';}).join('');
+ const banner=passed?'<div class="exam-pass-banner">✓ PASSED – 100% • COMPLETED</div>':'<div class="exam-not-passed"><b>NOT PASSED YET</b><br>You scored '+vocabQuizScore+' / '+total+' ('+pct+'%). You must score 100% to complete this quiz. Review the corrections, then try again.</div>';
+ const retry=passed?'':'<button class="vocab-quiz-primary" onclick="startVocabQuiz(activeVocabQuizId)">Try again – 100% required</button>';
+ document.getElementById('vocabQuizContent').innerHTML='<div class="vocab-quiz-result"><h3>'+(passed?'Quiz passed!':'Keep practising')+'</h3><strong>'+vocabQuizScore+' / '+total+'</strong><div>'+pct+'% correct</div></div>'+banner+'<div class="vocab-quiz-review">'+review+'</div><div class="vocab-quiz-controls"><button class="vocab-quiz-secondary" onclick="closeVocabQuiz()">Close</button>'+retry+'</div>';
 }
 document.getElementById('vocabQuizModal')?.addEventListener('click',e=>{if(e.target.id==='vocabQuizModal')closeVocabQuiz();});
 
