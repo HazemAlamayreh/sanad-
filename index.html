@@ -474,9 +474,49 @@ function saveSanadQuizProgress(){try{localStorage.setItem('sanadQuizProgress_v1'
 function sanadQuizPassed(id){return sanadQuizProgress[id]===true;}
 function sanadEnglishAngerTask(t){return t.subject==='English'&&(t.title.includes('Vocabulary – Dealing with Teenage Anger')||(t.phase==='revision'&&/Teenage Anger|Vocabulary Text 1/i.test(t.title+' '+t.detail)));}
 function sanadPhysicsSpeedTask(t){return t.subject==='Physics'&&(t.title.includes('Physics 9.1c – Speed + Study Sheet 3')||t.phase==='revision');}
-function renderSanadQuizBadges(t){let out=[];if(sanadEnglishAngerTask(t)){if(sanadQuizPassed('englishVocab'))out.push('<span class="quiz-pass-sign">✓ ENGLISH VOCAB PASSED – 100% • COMPLETED</span>');if(sanadQuizPassed('angerIceberg'))out.push('<span class="quiz-pass-sign">✓ ANGER ICEBERG PASSED – 100% • COMPLETED</span>');}if(sanadPhysicsSpeedTask(t)&&sanadQuizPassed('physics'))out.push('<span class="quiz-pass-sign">✓ PHYSICS SPEED PASSED – 100% • COMPLETED</span>');return out.length?'<div class="task-quiz-status">'+out.join('')+'</div>':'';}
-function renderSanadQuizButtons(t){let out=[];const btn=(id,label)=>'<button class="btn primary" onclick="startSanadQuiz(&quot;'+id+'&quot;)">'+label+'</button>';if(sanadEnglishAngerTask(t)){out.push(btn('englishVocab',sanadQuizPassed('englishVocab')?'Review passed Vocabulary quiz':'Start Vocabulary quiz'));out.push(btn('angerIceberg',sanadQuizPassed('angerIceberg')?'Review passed Anger Iceberg quiz':'Start Anger Iceberg quiz'));}if(sanadPhysicsSpeedTask(t))out.push(btn('physics',sanadQuizPassed('physics')?'Review passed Physics test':'Start Physics test'));return out.length?'<div class="task-quiz-actions">'+out.join('')+'</div>':'';}
-function renderSanadQuizCoverage(t){let label='',content='';if(sanadEnglishAngerTask(t)){label='English quiz coverage';content='Teenage Anger vocabulary: acceptable, beneath, affect, acknowledge, practical, frustrated, behaviour, indicate, boundaries, restored; meanings in context, word choice and sentence completion.\nThe Anger Iceberg: visible signs, hidden feelings, underlying causes, coping strategies, empathy and self-regulation.';}else if(sanadPhysicsSpeedTask(t)){label='Physics test coverage';content='Speed, distance and time formulas; m/s and km/h conversion; relative speed; moving surfaces; distance–time and speed–time graphs; graph axes and gradients; interpreting motion; average and maximum speed; distance from the area under a speed–time graph.';}else return esc(t.detail);return esc(t.detail)+'<details class="task-quiz-coverage"><summary>'+label+'</summary><div>'+esc(content)+'</div></details>';}
+function sanadMathPowersTask(t){
+ return t.subject==='Math'&&(t.title==='Unit 1 – Significant Figures, Powers & Standard Form (Lessons 1.1–1.2)'||t.phase==='revision');
+}
+function sanadMathIndicesTask(t){
+ return t.subject==='Math'&&(t.title==='Unit 1 – Lesson 1.3: Indices + practice'||t.phase==='revision');
+}
+function renderSanadQuizBadges(t){
+ let out=[];
+ if(sanadEnglishAngerTask(t)){
+  if(sanadQuizPassed('englishVocab'))out.push('<span class="quiz-pass-sign">✓ ENGLISH VOCAB PASSED – 100% • COMPLETED</span>');
+  if(sanadQuizPassed('angerIceberg'))out.push('<span class="quiz-pass-sign">✓ ANGER ICEBERG PASSED – 100% • COMPLETED</span>');
+ }
+ if(sanadPhysicsSpeedTask(t)&&sanadQuizPassed('physics'))out.push('<span class="quiz-pass-sign">✓ PHYSICS SPEED PASSED – 100% • COMPLETED</span>');
+ if(sanadMathPowersTask(t)&&sanadQuizPassed('mathPowers'))out.push('<span class="quiz-pass-sign">✓ MATH 27 NOV PASSED – 100% • COMPLETED</span>');
+ if(sanadMathIndicesTask(t)&&sanadQuizPassed('mathIndices'))out.push('<span class="quiz-pass-sign">✓ MATH 28 NOV PASSED – 100% • COMPLETED</span>');
+ return out.length?'<div class="task-quiz-status">'+out.join('')+'</div>':'';
+}
+function renderSanadQuizButtons(t){
+ let out=[];
+ const btn=(id,label)=>'<button class="btn primary" onclick="startSanadQuiz(&quot;'+id+'&quot;)">'+label+'</button>';
+ if(sanadEnglishAngerTask(t)){
+  out.push(btn('englishVocab',sanadQuizPassed('englishVocab')?'Review passed Vocabulary quiz':'Start Vocabulary quiz'));
+  out.push(btn('angerIceberg',sanadQuizPassed('angerIceberg')?'Review passed Anger Iceberg quiz':'Start Anger Iceberg quiz'));
+ }
+ if(sanadPhysicsSpeedTask(t))out.push(btn('physics',sanadQuizPassed('physics')?'Review passed Physics test':'Start Physics test'));
+ if(sanadMathPowersTask(t))out.push(btn('mathPowers',sanadQuizPassed('mathPowers')?'Review passed Math 27 Nov':'Start Math 27 Nov Mini Test'));
+ if(sanadMathIndicesTask(t))out.push(btn('mathIndices',sanadQuizPassed('mathIndices')?'Review passed Math 28 Nov':'Start Math 28 Nov Mini Test'));
+ return out.length?'<div class="task-quiz-actions">'+out.join('')+'</div>':'';
+}
+function renderSanadQuizCoverage(t){
+ let label='',content='';
+ if(sanadEnglishAngerTask(t)){
+  label='English quiz coverage';
+  content='Teenage Anger vocabulary: acceptable, beneath, affect, acknowledge, practical, frustrated, behaviour, indicate, boundaries, restored; meanings in context, word choice and sentence completion.\nThe Anger Iceberg: visible signs, hidden feelings, underlying causes, coping strategies, empathy and self-regulation.';
+ }else if(sanadPhysicsSpeedTask(t)){
+  label='Physics test coverage';
+  content='Speed, distance and time formulas; m/s and km/h conversion; relative speed; moving surfaces; distance–time and speed–time graphs; graph axes and gradients; interpreting motion; average and maximum speed; distance from the area under a speed–time graph.';
+ }else if(sanadMathPowersTask(t)||sanadMathIndicesTask(t)){
+  label='Math mini-test coverage';
+  content='November 27: powers of 10, decimal place movement, metric prefixes and unit conversion, significant figures, order of operations with powers and negative numbers, and estimation.\nNovember 28: index laws for multiplication, division and powers of powers; zero and negative indices; reciprocals; powers of fractions; and fractional reasoning.';
+ }else return esc(t.detail);
+ return esc(t.detail)+'<details class="task-quiz-coverage"><summary>'+label+'</summary><div>'+esc(content)+'</div></details>';
+}
 function startSanadQuiz(id){const q=sanadQuizData[id];if(!q)return;activeSanadQuizId=id;sanadQuizIndex=0;sanadQuizScore=0;sanadQuizAnswered=false;sanadQuizSelected=-1;sanadQuizResults=[];document.getElementById('sanadQuizTitle').textContent=q.title;document.getElementById('sanadQuizSubtitle').textContent=q.subtitle;document.getElementById('sanadQuizModal').classList.add('open');document.body.style.overflow='hidden';renderSanadQuizQuestion();}
 function closeSanadQuiz(){document.getElementById('sanadQuizModal').classList.remove('open');document.body.style.overflow='';}
 function selectSanadQuizAnswer(i){if(sanadQuizAnswered)return;sanadQuizSelected=i;sanadQuizAnswered=true;const q=sanadQuizData[activeSanadQuizId].questions[sanadQuizIndex];if(i===q.correct)sanadQuizScore++;sanadQuizResults.push({selected:i,correct:i===q.correct});renderSanadQuizQuestion();}
