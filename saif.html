@@ -131,6 +131,11 @@ body.pdf-exporting .weekly-report-footer{font-size:6.5pt!important;color:#6d7890
 .exam-model-answer{white-space:pre-wrap;background:#eef7f1;border:1px solid #d6eadc;border-radius:8px;padding:10px;margin-top:8px;font-size:13px}
 .exam-finish-title{font-size:20px;margin:0 0 6px}.exam-finish-sub{color:#64718a;font-size:13px;margin:0 0 16px}
 @media(max-width:600px){#arabicExamModal{padding:8px}.exam-shell{max-height:calc(100vh - 16px);padding:15px}.exam-top h2{font-size:18px}.exam-question{font-size:17px}}
+
+.task-exam-collapse{margin-top:9px;border:1px solid var(--line);border-radius:10px;background:#f8faff;padding:9px 11px}
+.task-exam-collapse summary{cursor:pointer;color:var(--blue);font-size:13px;font-weight:700;list-style-position:inside}
+.task-exam-text{white-space:pre-wrap;line-height:1.65;margin-top:10px;padding-top:9px;border-top:1px solid var(--line);max-height:420px;overflow:auto;font-size:13px;color:#37445e}
+
 </style>
 </head>
 <body>
@@ -266,11 +271,22 @@ function render(){
  document.getElementById('events').innerHTML=events[selected]?`<div class="event"><b>School delivery / exam:</b> ${events[selected]}</div>`:'';
  document.getElementById('tasklist').innerHTML=todays.map(t=>`<div class="task ${t.done?'done':''}">
  <div class="tasktop"><input type="checkbox" ${t.done?'checked':''} onchange="toggle(${t.id})"><div class="tasktitle">${esc(t.title)}</div></div>
- <div class="details">${esc(t.detail)}</div>
+ <div class="details">${renderTaskDetails(t)}</div>
  <div class="meta"><span class="tag">${esc(t.subject)}</span><span class="tag">${t.minutes} min</span><span class="tag ${t.status==='estimated'?'est':'confirm'}">${t.status==='estimated'?'Estimated':'Confirmed'}</span><span class="tag ${t.phase==='revision'?'revision':''}">${t.phase==='revision'?'Revision':'First-pass study'}</span><span class="tag">${t.done?'Completed':'To do'}</span></div>
  <div class="actions">${t.title.includes('ناقة صالح')?'<button class="btn primary" onclick="startArabicExam()">Start Exam</button>':''}<button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div>
  </div>`).join('')||'<p class="muted">No study tasks. Check the school delivery/exam note above.</p>';
 }
+
+function renderTaskDetails(t){
+ if(!t.title.includes('ناقة صالح'))return esc(t.detail);
+ const marker='امتحان اللغة العربية – الدرس الأول';
+ const idx=t.detail.indexOf(marker);
+ if(idx<0)return esc(t.detail);
+ const intro=t.detail.slice(0,idx).trim();
+ const exam=t.detail.slice(idx).trim();
+ return esc(intro)+'<details class="task-exam-collapse"><summary>Show exam content – 27 questions and model answers</summary><div class="task-exam-text" dir="auto">'+esc(exam)+'</div></details>';
+}
+
 function selectDay(d){selected=d;render()}
 function toggle(id){let t=tasks.find(x=>x.id===id);t.done=!t.done;persist();render()}
 function openEditor(){editing=null;document.getElementById('editheading').textContent='Add task';['fsubject','ftitle','fdetail'].forEach(k=>document.getElementById(k).value='');document.getElementById('fminutes').value=40;document.getElementById('fdate').value=selected;document.getElementById('fstatus').value='confirmed';document.getElementById('fphase').value='first';document.getElementById('editor').classList.remove('hidden')}
