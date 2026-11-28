@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sanad - Printable Weekly Study Plan</title>
+<style>
+:root{--ink:#1e2b47;--muted:#6d7a92;--line:#dce4f0;--blue:#315ecb;--pale:#f3f6fc}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6fb;color:var(--ink);font-family:Arial,Tahoma,"Noto Sans Arabic",sans-serif}
+.screen-header{max-width:1120px;margin:22px auto 14px;padding:0 16px}
+.screen-header h1{margin:0 0 5px;font-size:25px}
+.screen-header p{margin:0;color:var(--muted);font-size:14px}
+.toolbar{max-width:1120px;margin:14px auto 20px;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap}
+button{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+button.secondary{background:#e8edf7;color:#2d426d}
+#status{max-width:1120px;margin:0 auto 12px;padding:0 16px;color:var(--muted);font-size:13px}
+.week-page{width:min(1120px,calc(100% - 32px));margin:0 auto 22px;background:#fff;padding:18px;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px #1b2e5010}
+.week-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:2px solid var(--blue);padding-bottom:10px;margin-bottom:12px}
+.week-head h2{font-size:21px;margin:0 0 4px}
+.week-head p{font-size:12px;color:var(--muted);margin:0}
+.week-stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.week-stat{background:var(--pale);border:1px solid var(--line);padding:6px 9px;border-radius:9px;font-size:11px;white-space:nowrap}
+.week-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.day-card{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff;break-inside:avoid;min-width:0}
+.day-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid #e8edf5;margin-bottom:6px}
+.day-head strong{font-size:13px}
+.day-head small{color:var(--muted);font-size:10px}
+.day-total{font-weight:700;color:#34579d;font-size:10px;white-space:nowrap}
+.task{display:grid;grid-template-columns:14px 1fr 28px;gap:5px;align-items:start;padding:4px 0;border-bottom:1px dashed #e9edf4}
+.task:last-child{border-bottom:0}
+.check{width:10px;height:10px;border:1.2px solid #7f8ca2;border-radius:2px;margin-top:2px}
+.task.done .check{background:#d8f2e5;border-color:#29986c}
+.task.done .task-title{text-decoration:line-through;color:#82909f}
+.task-content{min-width:0}
+.task-title{font-size:11px;line-height:1.25;font-weight:700;overflow-wrap:anywhere}
+.task-subject{font-size:9px;font-weight:800;color:#345cae;margin-right:4px}
+.task-note{font-size:9px;line-height:1.25;color:#68758b;margin-top:2px;overflow-wrap:anywhere}
+.task-min{font-size:9px;color:#68758b;text-align:right;white-space:nowrap}
+.empty{color:#7b879b;font-size:11px;font-style:italic;padding:8px 0}
+.footer{margin-top:9px;padding-top:7px;border-top:1px solid var(--line);color:#8792a6;font-size:9px;display:flex;justify-content:space-between}
+.error{max-width:800px;margin:30px auto;padding:18px;background:#fff3f2;border:1px solid #efc4c0;color:#883a34;border-radius:12px}
+@media(max-width:650px){.week-grid{grid-template-columns:1fr}.week-head{flex-direction:column}.week-stats{justify-content:flex-start}}
+@page{size:A4 landscape;margin:6mm}
+@media print{
+ body{background:#fff;color:#17233c}
+ .screen-header,.toolbar,#status{display:none!important}
+ .week-page{width:100%;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;background:#fff;break-after:page;page-break-after:always}
+ .week-page:last-child{break-after:auto;page-break-after:auto}
+ body[data-print="week1"] .week-page:not(#week1),
+ body[data-print="week2"] .week-page:not(#week2),
+ body[data-print="week3"] .week-page:not(#week3),
+ body[data-print="week4"] .week-page:not(#week4){display:none!important}
+ .week-head{padding-bottom:5px;margin-bottom:6px}
+ .week-head h2{font-size:17px}
+ .week-head p{font-size:9px}
+ .week-stat{padding:4px 6px;font-size:8px}
+ .week-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .day-card{padding:6px;border-radius:7px}
+ .day-head{padding-bottom:4px;margin-bottom:3px}
+ .day-head strong{font-size:9.5px}
+ .day-head small,.day-total{font-size:7.5px}
+ .task{grid-template-columns:10px 1fr 22px;gap:4px;padding:2.5px 0}
+ .check{width:8px;height:8px;margin-top:1px}
+ .task-title{font-size:7.2px;line-height:1.16}
+ .task-subject{font-size:6.6px;margin-right:3px}
+ .task-note{font-size:6.3px;line-height:1.13;margin-top:1px}
+ .task-min{font-size:6.5px}
+ .empty{font-size:8px;padding:5px 0}
+ .footer{margin-top:5px;padding-top:4px;font-size:7px}
+}
+</style>
+</head>
+<body>
+<header class="screen-header">
+ <h1>Sanad - Printable Weekly Study Plan</h1>
+ <p>Choose one week to print, or print the complete four-week plan. Each week is formatted as a separate A4 landscape page.</p>
+</header>
+<div class="toolbar" id="toolbar">
+ <button onclick="printAll()">Print all 4 weeks</button>
+ <button class="secondary" onclick="printWeek('week1')">Print Week 1</button>
+ <button class="secondary" onclick="printWeek('week2')">Print Week 2</button>
+ <button class="secondary" onclick="printWeek('week3')">Print Week 3</button>
+ <button class="secondary" onclick="printWeek('week4')">Print Week 4</button>
+ <button class="secondary" onclick="location.href='./'">Back to Sanad Dashboard</button>
+</div>
+<div id="status">Loading Sanad's task list…</div>
+<main id="plans"></main>
+<script>
+const weekRanges=[
+ {id:"week1",name:"Week 1",label:"November 27 – December 3",start:"2026-11-27",end:"2026-12-03"},
+ {id:"week2",name:"Week 2",label:"December 4 – December 10",start:"2026-12-04",end:"2026-12-10"},
+ {id:"week3",name:"Week 3",label:"December 11 – December 17",start:"2026-12-11",end:"2026-12-17"},
+ {id:"week4",name:"Week 4",label:"December 18 – December 23",start:"2026-12-18",end:"2026-12-23"}
+];
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dateLabel=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"});
+function dateRange(w){const out=[];let d=w.start;while(d<=w.end){out.push(d);const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+1);d=x.toISOString().slice(0,10);}return out;}
+function fmtHours(m){return (m/60).toFixed(1)+" hrs";}
+function shortDetail(s){let x=String(s||"").replace(/\s+/g," ").trim();return x.length>108?x.slice(0,105)+"…":x;}
+function render(tasks){
+ const host=document.getElementById("plans");
+ host.innerHTML=weekRanges.map(w=>{
+  const list=tasks.filter(t=>t.date>=w.start&&t.date<=w.end);
+  const done=list.filter(t=>t.done).length;
+  const mins=list.reduce((a,t)=>a+(Number(t.minutes)||0),0);
+  const days=dateRange(w);
+  const cards=days.map(d=>{
+   const items=tasks.filter(t=>t.date===d);
+   const dayMins=items.reduce((a,t)=>a+(Number(t.minutes)||0),0);
+   const taskHtml=items.map(t=>{
+    const detail=shortDetail(t.detail);
+    return '<div class="task '+(t.done?"done":"")+'"><span class="check"></span><div class="task-content"><div class="task-title"><span class="task-subject">'+esc(t.subject)+'</span>'+esc(t.title)+'</div>'+(detail?'<div class="task-note">'+esc(detail)+'</div>':'')+'</div><span class="task-min">'+(Number(t.minutes)||0)+'m</span></div>';
+   }).join("");
+   return '<section class="day-card"><div class="day-head"><div><strong>'+esc(dateLabel(d))+'</strong> <small>• '+items.length+' tasks</small></div><span class="day-total">'+(items.length?fmtHours(dayMins):"")+'</span></div>'+(taskHtml||'<div class="empty">No tasks scheduled - rest or catch-up time.</div>')+'</section>';
+  }).join("");
+  return '<section class="week-page" id="'+w.id+'"><div class="week-head"><div><h2>Sanad | '+w.name+'</h2><p>'+w.label+' • Daily study checklist</p></div><div class="week-stats"><span class="week-stat"><b>'+list.length+'</b> tasks</span><span class="week-stat"><b>'+done+'/'+list.length+'</b> completed</span><span class="week-stat"><b>'+fmtHours(mins)+'</b> planned study</span></div></div><div class="week-grid">'+cards+'</div><div class="footer"><span>Tick each item after completing it.</span><span>Sanad - Weekly Study Plan</span></div></section>';
+ }).join("");
+ document.getElementById("status").textContent="Loaded "+tasks.length+" tasks from the current Sanad plan. The four weeks are shown below.";
+}
+async function load(){
+ try{
+  const response=await fetch("./index.html",{cache:"no-store"});
+  if(!response.ok)throw new Error("Could not load the current dashboard task list.");
+  const source=await response.text();
+  const start=source.indexOf("const initialTasks=");
+  const end=source.indexOf("];\nconst events",start);
+  if(start<0||end<0)throw new Error("Could not find the task list in the dashboard.");
+  const prefix="const initialTasks=";
+  let tasks=JSON.parse(source.slice(start+prefix.length,end+1));
+  try{
+   const saved=JSON.parse(localStorage.getItem("sanadMissionDashboard_v4")||"null");
+   if(Array.isArray(saved)){
+    const progress=new Map(saved.map(t=>[String(t.date)+"|"+String(t.subject)+"|"+String(t.title),t]));
+    tasks=tasks.map(t=>({...t,...(progress.get(String(t.date)+"|"+String(t.subject)+"|"+String(t.title))||{})}));
+   }
+  }catch(e){}
+  render(tasks);
+ }catch(e){
+  document.getElementById("status").innerHTML='<div class="error">'+esc(e.message)+"</div>";
+ }
+}
+function printAll(){document.body.dataset.print="all";window.print();}
+function printWeek(id){document.body.dataset.print=id;window.print();}
+window.addEventListener("afterprint",()=>{delete document.body.dataset.print;});
+load();
+</script>
+</body>
+</html>
