@@ -207,6 +207,25 @@ body.pdf-exporting .weekly-report-footer{font-size:6.5pt!important;color:#6d7890
 .printable-weekly-link a{color:#2854b5;font-weight:800;text-decoration:none;font-size:13px}
 .printable-weekly-link a:hover{text-decoration:underline}
 
+
+.quiz-answer-input{width:100%;border:1px solid #cfd9ea;border-radius:11px;padding:13px;font:inherit;font-size:16px;color:#24314d;background:#fff;box-sizing:border-box;min-height:46px}
+.quiz-answer-textarea{width:100%;min-height:110px;resize:vertical;border:1px solid #cfd9ea;border-radius:11px;padding:12px;font:inherit;font-size:14px;line-height:1.5;color:#24314d;background:#fff;box-sizing:border-box}
+.quiz-match-list{display:grid;gap:10px}
+.quiz-match-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,1fr);gap:10px;align-items:center;padding:10px;border:1px solid #e1e7f0;border-radius:10px}
+.quiz-match-row label{font-size:14px;font-weight:700;color:#2e3d5b}
+.quiz-match-row select{width:100%;padding:10px;border:1px solid #ccd7e8;border-radius:8px;background:#fff;font:inherit;color:#263653}
+.quiz-model-answer{border:1px solid #dce4f0;background:#f8faff;padding:10px 12px;border-radius:10px;margin-top:10px;font-size:13px;line-height:1.5;color:#3e4f6f}
+.quiz-score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.quiz-score-card{border:1px solid #dfe6f0;background:#f8faff;border-radius:12px;padding:13px;text-align:left}
+.quiz-score-card small{display:block;color:#6b7890;font-size:11px;font-weight:800;text-transform:uppercase}
+.quiz-score-card strong{display:block;font-size:28px;margin-top:5px;color:#2d4166}
+.quiz-score-card.latest-low{border-color:#f1b6b6;background:#fff3f3}.quiz-score-card.latest-low strong{color:#c53636}
+.quiz-score-card.latest-high{border-color:#a9ddc1;background:#effaf3}.quiz-score-card.latest-high strong{color:#14764f}
+.quiz-score-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.quiz-score-chip{display:inline-flex;gap:5px;align-items:center;border:1px solid #dfe6f0;background:#f8faff;border-radius:9px;padding:6px 9px;font-size:10px;color:#485875}
+.score-low{color:#c53636;font-weight:850}.score-high{color:#14764f;font-weight:850}
+@media(max-width:600px){.quiz-match-row{grid-template-columns:1fr}.quiz-score-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -375,7 +394,7 @@ function renderWeeklyOverview(){
     const list=tasks.filter(t=>t.date===d).sort((a,b)=>(a.subject||'').localeCompare(b.subject||''));
     if(!list.length)return '';
     const label=dateLabel(d);
-    const items=list.map(t=>'<article class="weekly-overview-task '+(t.done?'done':'')+'"><div class="weekly-overview-tasktop"><input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTask('+t.id+')"><div class="weekly-overview-tasktitle">'+esc(t.title)+'</div></div><div class="weekly-overview-taskmeta"><span>'+esc(t.subject)+'</span><span>'+Number(t.minutes||0)+' min</span><span>'+(t.phase==='revision'?'Revision':'First study')+'</span><span>'+(t.done?'Completed':'To do')+'</span></div><div class="weekly-overview-description">'+renderSanadQuizCoverage(t)+'</div>'+renderSanadQuizBadges(t)+'<div class="task-quiz-actions">'+renderSanadQuizButtons(t)+'<button class="btn" onclick="editTask('+t.id+')">Edit</button><button class="btn" onclick="deleteTask('+t.id+')">Delete</button></div></article>').join('');
+    const items=list.map(t=>'<article class="weekly-overview-task '+(t.done?'done':'')+'"><div class="weekly-overview-tasktop"><input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleTask('+t.id+')"><div class="weekly-overview-tasktitle">'+esc(t.title)+'</div></div><div class="weekly-overview-taskmeta"><span>'+esc(t.subject)+'</span><span>'+Number(t.minutes||0)+' min</span><span>'+(t.phase==='revision'?'Revision':'First study')+'</span><span>'+(t.done?'Completed':'To do')+'</span></div><div class="weekly-overview-description">'+renderSanadQuizCoverage(t)+'</div>'+renderSanadQuizBadges(t)+renderSanadQuizScores(t)+'<div class="task-quiz-actions">'+renderSanadQuizButtons(t)+'<button class="btn" onclick="editTask('+t.id+')">Edit</button><button class="btn" onclick="deleteTask('+t.id+')">Delete</button></div></article>').join('');
     return '<section class="weekly-overview-day"><h4>'+esc(label)+' • '+list.length+' tasks</h4>'+items+'</section>';
    }).join('');
    const weekDone=tasksForWeek(w).filter(t=>t.done).length;
@@ -410,7 +429,7 @@ function render(){
  document.getElementById('daytitle').textContent=dateLabel(selected)+' – Mission Board';
  document.getElementById('daymeta').textContent=`${rhythm} • ${dayTasks.length} tasks • ${minutes} minutes (${(minutes/60).toFixed(1)} hours)`;
  document.getElementById('events').innerHTML=ev?`<div class="event ${ev.kind==='exam'?'final':''}"><b>${ev.kind==='exam'?'EXAM DAY':'SCHOOL DELIVERY / ASSESSMENT'}:</b> ${ev.text}</div>`:'';
- document.getElementById('tasklist').innerHTML=dayTasks.map(t=>`<div class="task ${t.done?'complete':''}"><div class="taskline"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id})"><div class="tasktitle">${esc(t.title)}</div></div><div class="taskdetail">${renderSanadQuizCoverage(t)}</div><div class="meta"><span>${esc(t.subject)}</span><span>${t.minutes} min</span><span class="${t.status==='estimated'?'estimated':''}">${t.status==='estimated'?'Estimated / confirm':'Confirmed material'}</span><span class="${t.phase==='revision'?'revision':''}">${t.phase==='revision'?'Revision':'First-pass study'}</span><span class="${t.done?'success':''}">${t.done?'Completed ✓':'To do'}</span></div><div class="actions">${renderSanadQuizButtons(t)}<button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div></div>`).join('')||'<div class="summary">No tasks scheduled for this day.</div>';
+ document.getElementById('tasklist').innerHTML=dayTasks.map(t=>`<div class="task ${t.done?'complete':''}"><div class="taskline"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id})"><div class="tasktitle">${esc(t.title)}</div></div><div class="taskdetail">${renderSanadQuizCoverage(t)}</div><div class="meta"><span>${esc(t.subject)}</span><span>${t.minutes} min</span><span class="${t.status==='estimated'?'estimated':''}">${t.status==='estimated'?'Estimated / confirm':'Confirmed material'}</span><span class="${t.phase==='revision'?'revision':''}">${t.phase==='revision'?'Revision':'First-pass study'}</span><span class="${t.done?'success':''}">${t.done?'Completed ✓':'To do'}</span></div>${renderSanadQuizBadges(t)}${renderSanadQuizScores(t)}<div class="actions">${renderSanadQuizButtons(t)}<button class="btn" onclick="editTask(${t.id})">Edit</button><button class="btn" onclick="deleteTask(${t.id})">Delete</button></div></div>`).join('')||'<div class="summary">No tasks scheduled for this day.</div>';
 }
 function selectDay(d){selected=d;render()}
 const messages=[
@@ -632,12 +651,99 @@ function recordSanadQuizAttempt(id,pct,earned,total){
  if(pct===100){sanadQuizProgress[id]=true;saveSanadQuizProgress();}
  saveSanadQuizRecords();sanadQuizResultRecorded=true;
 }
-function startSanadQuiz(id){const q=sanadQuizData[id];if(!q)return;activeSanadQuizId=id;sanadQuizIndex=0;sanadQuizScore=0;sanadQuizAnswered=false;sanadQuizSelected=-1;sanadQuizResults=[];document.getElementById('sanadQuizTitle').textContent=q.title;document.getElementById('sanadQuizSubtitle').textContent=q.subtitle;document.getElementById('sanadQuizModal').classList.add('open');document.body.style.overflow='hidden';renderSanadQuizQuestion();}
+
+function startSanadQuiz(id){
+ const q=sanadQuizData[id];if(!q)return;
+ activeSanadQuizId=id;sanadQuizIndex=0;sanadQuizScore=0;sanadQuizAnswered=false;sanadQuizSelected=-1;sanadQuizResults=[];sanadQuizTypedAnswer='';sanadQuizMatchAnswers=[];sanadQuizResultRecorded=false;
+ document.getElementById('sanadQuizTitle').textContent=q.title;
+ document.getElementById('sanadQuizSubtitle').textContent=q.subtitle||'';
+ document.getElementById('sanadQuizModal').classList.add('open');document.body.style.overflow='hidden';renderSanadQuizQuestion();
+}
 function closeSanadQuiz(){document.getElementById('sanadQuizModal').classList.remove('open');document.body.style.overflow='';}
-function selectSanadQuizAnswer(i){if(sanadQuizAnswered)return;sanadQuizSelected=i;sanadQuizAnswered=true;const q=sanadQuizData[activeSanadQuizId].questions[sanadQuizIndex];if(i===q.correct)sanadQuizScore++;sanadQuizResults.push({selected:i,correct:i===q.correct});renderSanadQuizQuestion();}
-function renderSanadQuizQuestion(){const quiz=sanadQuizData[activeSanadQuizId],q=quiz.questions[sanadQuizIndex],total=quiz.questions.length,pct=Math.round((sanadQuizIndex+1)/total*100);const options=q.options.map((op,i)=>{let cl='';if(sanadQuizAnswered&&i===q.correct)cl=' correct';else if(sanadQuizAnswered&&i===sanadQuizSelected)cl=' incorrect';return '<button type="button" class="quiz-option'+cl+'" '+(sanadQuizAnswered?'disabled':'')+' onclick="selectSanadQuizAnswer('+i+')">'+String.fromCharCode(65+i)+'. '+esc(op)+'</button>';}).join('');let feedback='';if(sanadQuizAnswered){const ok=sanadQuizSelected===q.correct;feedback='<div class="quiz-feedback '+(ok?'good':'bad')+'"><b>'+(ok?'Correct!':'Not quite.')+'</b> '+esc(q.why)+'</div>';}document.getElementById('sanadQuizContent').innerHTML='<div class="quiz-counter">QUESTION '+(sanadQuizIndex+1)+' OF '+total+' • SCORE '+sanadQuizScore+'</div><div class="quiz-progress"><span style="width:'+pct+'%"></span></div><div class="quiz-question">'+esc(q.q)+'</div><div class="quiz-options">'+options+'</div>'+feedback+'<div class="quiz-controls"><span class="summary">'+(sanadQuizAnswered?'Answer recorded':'Choose one answer')+'</span>'+(sanadQuizAnswered?'<button class="quiz-primary" onclick="nextSanadQuizQuestion()">'+(sanadQuizIndex===total-1?'See results':'Next question →')+'</button>':'')+'</div>';}
-function nextSanadQuizQuestion(){if(!sanadQuizAnswered)return;const total=sanadQuizData[activeSanadQuizId].questions.length;if(sanadQuizIndex<total-1){sanadQuizIndex++;sanadQuizAnswered=false;sanadQuizSelected=-1;renderSanadQuizQuestion();}else renderSanadQuizResult();}
-function renderSanadQuizResult(){const quiz=sanadQuizData[activeSanadQuizId],total=quiz.questions.length,pct=Math.round(sanadQuizScore/total*100),passedNow=sanadQuizScore===total;if(passedNow&&!sanadQuizPassed(activeSanadQuizId)){sanadQuizProgress[activeSanadQuizId]=true;saveSanadQuizProgress();render();}const passed=sanadQuizPassed(activeSanadQuizId);const review=quiz.questions.map((q,i)=>{const result=sanadQuizResults[i]||{selected:-1};return '<div class="quiz-review-item"><b>'+(i+1)+'. '+esc(q.q)+'</b><br>Your answer: '+esc(result.selected>=0?q.options[result.selected]:'No answer')+'<br>Correct answer: <b>'+esc(q.options[q.correct])+'</b><br><span>'+esc(q.why)+'</span></div>';}).join('');const banner=passed?'<div class="quiz-pass-banner">✓ PASSED – 100% • COMPLETED<br>'+total+' / '+total+' correct.</div>':'<div class="quiz-not-passed"><b>NOT PASSED YET</b><br>You scored '+sanadQuizScore+' / '+total+' ('+pct+'%). A score of 100% is required. Review the answers, then try again.</div>';const retry=passed?'':'<button class="quiz-primary" onclick="startSanadQuiz(activeSanadQuizId)">Try again – 100% required</button>';document.getElementById('sanadQuizContent').innerHTML='<div class="quiz-result"><h3>'+(passed?'Quiz passed!':'Keep practising')+'</h3><strong>'+sanadQuizScore+' / '+total+'</strong><div>'+pct+'% correct</div></div>'+banner+'<div class="quiz-review">'+review+'</div><div class="quiz-controls"><button class="quiz-secondary" onclick="closeSanadQuiz()">Close</button>'+retry+'</div>';}
+function selectSanadQuizAnswer(i){
+ if(sanadQuizAnswered)return;
+ const q=sanadQuizData[activeSanadQuizId].questions[sanadQuizIndex];
+ sanadQuizSelected=i;sanadQuizAnswered=true;
+ const earned=i===q.correct?1:0;sanadQuizScore+=earned;
+ sanadQuizResults.push({type:'mcq',selected:i,earned,total:1});renderSanadQuizQuestion();
+}
+function setSanadQuizTypedAnswer(value){sanadQuizTypedAnswer=value;}
+function setSanadQuizMatchAnswer(index,value){sanadQuizMatchAnswers[index]=value;}
+function submitSanadQuizAnswer(){
+ if(sanadQuizAnswered)return;
+ const q=sanadQuizData[activeSanadQuizId].questions[sanadQuizIndex];
+ if(q.type==='match'){
+  if(q.items.some((item,i)=>sanadQuizMatchAnswers[i]===undefined||sanadQuizMatchAnswers[i]===''))return;
+  const earned=q.items.reduce((sum,item,i)=>sum+(Number(sanadQuizMatchAnswers[i])===item.correct?1:0),0);
+  sanadQuizScore+=earned;sanadQuizResults.push({type:'match',response:[...sanadQuizMatchAnswers],earned,total:q.items.length});
+ }else{
+  if(!String(sanadQuizTypedAnswer||'').trim())return;
+  const earned=sanadTextAnswerCorrect(q,sanadQuizTypedAnswer)?1:0;
+  sanadQuizScore+=earned;sanadQuizResults.push({type:'text',response:sanadQuizTypedAnswer,earned,total:1});
+ }
+ sanadQuizAnswered=true;renderSanadQuizQuestion();
+}
+function renderSanadQuizQuestion(){
+ const quiz=sanadQuizData[activeSanadQuizId],q=quiz.questions[sanadQuizIndex],totalQ=quiz.questions.length;
+ const ptsBefore=quiz.questions.slice(0,sanadQuizIndex+1).reduce((sum,item)=>sum+sanadQuestionPoints(item),0);
+ const qType=q.type||'mcq';let body='';
+ if(qType==='mcq'){
+  body='<div class="quiz-options">'+q.options.map((op,i)=>{
+   let cl='';if(sanadQuizAnswered&&i===q.correct)cl=' correct';else if(sanadQuizAnswered&&i===sanadQuizSelected)cl=' incorrect';
+   return '<button type="button" class="quiz-option'+cl+'" '+(sanadQuizAnswered?'disabled':'')+' onclick="selectSanadQuizAnswer('+i+')">'+String.fromCharCode(65+i)+'. '+esc(op)+'</button>';
+  }).join('')+'</div>';
+ }else if(qType==='fill'||qType==='short'){
+  const input=qType==='fill'
+   ?'<input class="quiz-answer-input" type="text" autocomplete="off" placeholder="Type your answer here…" value="'+esc(sanadQuizTypedAnswer)+'" '+(sanadQuizAnswered?'disabled':'')+' oninput="setSanadQuizTypedAnswer(this.value)">'
+   :'<textarea class="quiz-answer-textarea" placeholder="Write your explanation here…" '+(sanadQuizAnswered?'disabled':'')+' oninput="setSanadQuizTypedAnswer(this.value)">'+esc(sanadQuizTypedAnswer)+'</textarea>';
+  body='<div class="quiz-options">'+input+'</div>'+(!sanadQuizAnswered?'<div class="quiz-controls"><button class="quiz-primary" onclick="submitSanadQuizAnswer()">Check answer</button></div>':'');
+ }else if(qType==='match'){
+  body='<div class="quiz-match-list">'+q.items.map((item,i)=>{
+   const chosen=sanadQuizMatchAnswers[i]??'';
+   const opts='<option value="">Choose a match…</option>'+item.options.map((option,j)=>'<option value="'+j+'" '+(String(chosen)===String(j)?'selected':'')+'>'+esc(option)+'</option>').join('');
+   const correct=sanadQuizAnswered?Number(chosen)===item.correct:false;
+   return '<div class="quiz-match-row"><label>'+esc(item.prompt)+'</label><select '+(sanadQuizAnswered?'disabled':'')+' onchange="setSanadQuizMatchAnswer('+i+',this.value)">'+opts+'</select>'+(sanadQuizAnswered?'<span class="'+(correct?'score-high':'score-low')+'">'+(correct?'Correct':'Review this match')+'</span>':'')+'</div>';
+  }).join('')+'</div>'+(!sanadQuizAnswered?'<div class="quiz-controls"><button class="quiz-primary" onclick="submitSanadQuizAnswer()">Check matches</button></div>':'');
+ }
+ let feedback='';
+ if(sanadQuizAnswered){
+  const result=sanadQuizResults[sanadQuizResults.length-1]||{earned:0,total:sanadQuestionPoints(q)};
+  const ok=result.earned===result.total;let detail=esc(q.why||'');
+  if(q.type==='fill')detail+=' Accepted answer: '+esc(q.answers?.[0]||'');
+  if(q.type==='short')detail+='<div class="quiz-model-answer"><b>Model answer:</b> '+esc(q.modelAnswer||'')+'</div>';
+  if(q.type==='match')detail+=' Correct matches: '+result.earned+' / '+result.total+'.';
+  feedback='<div class="quiz-feedback '+(ok?'good':'bad')+'"><b>'+(ok?'Correct!':q.type==='match'?'Some matches need correction.':'Not quite.')+'</b> '+detail+'</div>';
+ }
+ document.getElementById('sanadQuizContent').innerHTML=
+  '<div class="quiz-counter">QUESTION '+(sanadQuizIndex+1)+' OF '+totalQ+' • SCORE '+sanadQuizScore+' / '+ptsBefore+' POINTS</div>'+
+  '<div class="quiz-progress"><span style="width:'+Math.round((sanadQuizIndex+1)/totalQ*100)+'%"></span></div>'+
+  '<div class="quiz-question">'+esc(q.q)+'</div>'+body+feedback+
+  (sanadQuizAnswered?'<div class="quiz-controls"><span class="summary">Answer recorded</span><button class="quiz-primary" onclick="nextSanadQuizQuestion()">'+(sanadQuizIndex===totalQ-1?'See results':'Next question →')+'</button></div>':'');
+}
+function nextSanadQuizQuestion(){
+ if(!sanadQuizAnswered)return;
+ const total=sanadQuizData[activeSanadQuizId].questions.length;
+ if(sanadQuizIndex<total-1){sanadQuizIndex++;sanadQuizAnswered=false;sanadQuizSelected=-1;sanadQuizTypedAnswer='';sanadQuizMatchAnswers=[];renderSanadQuizQuestion();}
+ else renderSanadQuizResult();
+}
+function renderSanadQuizResult(){
+ const quiz=sanadQuizData[activeSanadQuizId],total=sanadQuizTotalPoints(quiz),earned=sanadQuizScore,pct=Math.round(earned/total*100);
+ recordSanadQuizAttempt(activeSanadQuizId,pct,earned,total);
+ const record=sanadQuizRecords[activeSanadQuizId]||{};
+ const passed=sanadQuizPassed(activeSanadQuizId)||pct===100;
+ const review=quiz.questions.map((q,i)=>{
+  const r=sanadQuizResults[i]||{earned:0,total:sanadQuestionPoints(q)};let response='';
+  if(r.type==='mcq')response='Your answer: '+esc(q.options[r.selected]??'No answer')+'<br>Correct answer: <b>'+esc(q.options[q.correct])+'</b>';
+  else if(r.type==='text')response='Your answer: '+esc(r.response||'No answer')+'<br>'+(q.answers?'Accepted answer: ':'Model answer: <b>')+(q.answers?esc(q.answers[0]):esc(q.modelAnswer||''))+(q.answers?'':'</b>');
+  else if(r.type==='match')response=q.items.map((item,j)=>'<br>'+esc(item.prompt)+': '+(r.response?.[j]!==undefined?esc(item.options[Number(r.response[j])]||'—'):'—')+' • Correct: <b>'+esc(item.options[item.correct])+'</b>').join('');
+  return '<div class="quiz-review-item"><b>'+(i+1)+'. '+esc(q.q)+'</b><br>Points: '+r.earned+' / '+r.total+'<br>'+response+'<br><span>'+esc(q.why||'')+'</span></div>';
+ }).join('');
+ const first=record.firstScore??pct,latest=record.latestScore??pct;
+ const scoreCards='<div class="quiz-score-grid"><div class="quiz-score-card"><small>First attempt score</small><strong>'+first+'%</strong><span>'+(record.firstRaw||earned+'/'+total)+'</span></div><div class="quiz-score-card '+(latest<100?'latest-low':'latest-high')+'"><small>Latest actual score</small><strong>'+latest+'%</strong><span>'+(record.latestRaw||earned+'/'+total)+' • '+(record.attempts||1)+' attempt(s)</span></div></div>';
+ const banner=passed?'<div class="quiz-pass-banner">✓ PASSED – 100% • COMPLETED<br>Best score: '+(record.bestScore||pct)+'%</div>':'<div class="quiz-not-passed"><b>NOT PASSED YET</b><br>Your latest actual score is <b class="'+(latest<100?'score-low':'score-high')+'">'+latest+'%</b>. A score of 100% is required. Review the answers and try again.</div>';
+ const retry=passed?'':'<button class="quiz-primary" onclick="startSanadQuiz(activeSanadQuizId)">Try again – 100% required</button>';
+ document.getElementById('sanadQuizContent').innerHTML='<div class="quiz-result"><h3>'+(passed?'Exam completed!':'Keep practising')+'</h3><strong>'+earned+' / '+total+'</strong><div>'+pct+'% on this attempt</div></div>'+scoreCards+banner+'<div class="quiz-review">'+review+'</div><div class="quiz-controls"><button class="quiz-secondary" onclick="closeSanadQuiz()">Close</button>'+retry+'</div>';
+}
 document.getElementById('sanadQuizModal')?.addEventListener('click',e=>{if(e.target.id==='sanadQuizModal')closeSanadQuiz();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSanadQuiz();});
 renderWeekOptions();
